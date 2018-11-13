@@ -1,0 +1,56 @@
+import boom from 'boom';
+import Joi from 'joi';
+import User from '../models/user';
+
+const getAll = async (req, res) => {
+    try {
+      if (req.user.role === 'viewer') {
+        throw boom.unauthorized('You do not have permission to create campaign.');
+      }
+    const users = await User.find({ campaign: req.campaign });
+    res.status(200).json(users);
+  } catch (error) {
+    boom.boomify(error);
+    const err = new Error();
+    err.status = error.status || error.output.statusCode || 500;
+    err.message = error.message || 'Internal server error';
+    res.status(err.status).send(err);
+  }
+};
+
+const disableOrEnable = async (req, res) => {
+  const { id } = req.params;
+  const schema = Joi.object().keys({
+    is_active: Joi.boolean().required(),
+   });
+
+  const { value, error } = Joi.validate(req.body, schema);
+  if (error && error.details) {
+    let message = 'Some required fields are missing';
+    if (error.details[0]) {
+      message = error.details[0].message
+    }
+    throw boom.badRequest(message);
+  }
+  const {is_active} = value;
+  try {
+    if (req.user.role === 'viewer') {
+      throw boom.unauthorized('You do not have permission to disable a user account.');
+    }
+    const user = await User.findOneAndUpdate({ '_id':id, 'campaign': req.campaign }, { $set: { is_active } }, { new: true });
+    if (!user) {
+      throw boom.notFound('User not found');
+    }
+    res.status(200).json(user);
+  } catch (error) {
+    const err = new Error();
+    err.status = error.status || error.output.statusCode || 500;
+    err.message = error.message || 'Internal server error';
+    res.status(err.status).send(err);
+  }
+};
+
+export default {
+  getAll,
+  disableOrEnable,
+};

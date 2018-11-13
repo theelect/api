@@ -1,0 +1,47 @@
+{
+  "name": "elect",
+  "version": "1.0.0",
+  "description": "The Elect API",
+  "main": "app.js",
+  "scripts": {
+    "start": "npm run apidoc  && nodemon src/index.js --exec babel-node --presets env",
+    "dev": "npm run apidoc  && nodemon src/index.js --exec babel-node --presets env",
+    "build": "babel src -d dist --source-maps inline --copy-files",
+    "serve": "node dist/index.js",
+    "apidoc": "apidoc -i src/api/routes/ -o src/public/apidoc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "apidoc": {
+    "title": "The Elect API documentation",
+    "template": {
+      "forceLanguage": "en"
+    }
+  },
+  "keywords": [
+    "Election",
+    "Campaign"
+  ],
+  "author": "Johnson Ejezie",
+  "license": "ISC",
+  "dependencies": {
+    "apidoc": "^0.17.7",
+    "bcryptjs": "^2.4.3",
+    "boom": "^7.2.2",
+    "cors": "^2.8.5",
+    "dotenv": "^6.1.0",
+    "express": "^4.16.3",
+    "joi": "^14.0.6",
+    "jsonwebtoken": "^8.3.0",
+    "lodash": "^4.17.11",
+    "mongoose": "^5.3.11",
+    "morgan": "^1.9.0"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-preset-env": "^1.6.1",
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-plugin-import": "^2.11.0",
+    "nodemon": "^1.17.3"
+  }
+}
