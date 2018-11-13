@@ -54,7 +54,7 @@ const ensureAuthenticated = async (req, res, next) => {
 const login = async (req, res) => {
   try {
     const schema = Joi.object().keys({
-      username: Joi.string().required(),
+      email: Joi.email().required(),
       password: Joi.string().required(),
       device: Joi.string().required(),
    });
@@ -68,8 +68,8 @@ const login = async (req, res) => {
     throw boom.badRequest(message);
   }
   
-  const { username, password, device } = value;
-  const user = await User.findByCredentials(username, password);
+  const { email, password, device } = value;
+  const user = await User.findByCredentials(email, password);
   if (!user.is_active) {
     throw boom.unauthorized('This account is disabled');
   }
@@ -93,7 +93,7 @@ const createAdmin = async (req, res) => {
       throw boom.badRequest('You do not have the required permission to create new account.');
     }
     const schema = Joi.object().keys({
-      username: Joi.string().required(),
+      email: Joi.string().email().required(),
       password: Joi.string().required(),
       role: Joi.string().required(),
     });
@@ -107,10 +107,10 @@ const createAdmin = async (req, res) => {
       throw boom.badRequest(message);
     }
 
-    const { username } = value;
-    const existingUser = await User.findOne({ username });
+    const { email } = value;
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
-      throw boom.badRequest('Username already exist');
+      throw boom.badRequest('email already exist');
     }
     value.campaign = req.campaign;
     const user = new User(value);

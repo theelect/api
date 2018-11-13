@@ -7,7 +7,7 @@ import jwt from 'jsonwebtoken';
 const { Schema } = mongoose;
 
 const userSchema = new Schema({
-  username: {
+  email: {
     type: String,
     required: [true, 'Username is required.'],
     unique: true,    
@@ -50,7 +50,7 @@ userSchema.methods = {
   toJSON() {
     const userObject = this.toObject();
     return pick(userObject, [
-      '_id', 'username', 'role', 'is_active',
+      '_id', 'email', 'role', 'is_active',
     ]);
   },
 
@@ -90,8 +90,8 @@ userSchema.statics = {
     });
   },
 
-  findByCredentials(username, password) {
-    return this.findOne({ username }).then((user) => {
+  findByCredentials(email, password) {
+    return this.findOne({ email }).then((user) => {
       if (!user) {
         const err = new Error('Username not found');
         err.status = 404;

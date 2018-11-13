@@ -4,12 +4,12 @@ export default (app) => {
     /**
  * @api {post} /login Login
  * @apiGroup Authentication
- * @apiParam {String} username User's username
+ * @apiParam {String} email User's email
  * @apiParam {String} password User's password
  * @apiParam {String} device User's device web or android only
  * @apiParamExample {json} Input
  * {
- *   "username": "admin",
+ *   "email": "admin@admin.com",
  *   "password": "admin",
  *   "device": "web"
  * }
@@ -36,12 +36,12 @@ export default (app) => {
  * @apiHeaderExample {json} Request-Example:
                  { "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1YmVhOTk3NjY4YjM3OTMyYWExNDEzODUiLCJhY2Nlc3MiOiJhdXRoIiwiaWF0IjoxNTQyMTAxMzY3fQ.090xmsDngmmn_G5EJbNLi6O3I3D_5h30BEiwjldxH7g",
                   "apiKey": "i871KgLg8Xm6FRKHGWCdBpaDHGEGjDJD" }
- * @apiParam {String} username User's username
+ * @apiParam {String} email User's email
  * @apiParam {String} password User's password
  * @apiParam {String} role User's role it can be viewer or editor only
  * @apiParamExample {json} Input
  * {
- *   "username": "admin",
+ *   "email": "admin@admin.com",
  *   "password": "admin",
  *   "role": "editor"
  * }
@@ -55,7 +55,7 @@ export default (app) => {
  *    HTTP/1.1 400 Bad Request
  * {
  *   "status": 400,
- *   "message": "Username already exist"
+ *   "message": "email already exist"
  *  }
  */
     app.post('/api/v1/create-admin', Auth.ensureAuthenticated, Auth.ensureCampaign, Auth.createAdmin);
@@ -73,7 +73,7 @@ export default (app) => {
  *    HTTP/1.1 400 Bad Request
  * {
  *   "status": 404,
- *   "message": "Username not found"
+ *   "message": "email not found"
  *  }
  */
     app.delete('/api/v1/logout', Auth.ensureAuthenticated, Auth.logout);
