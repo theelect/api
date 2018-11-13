@@ -4,7 +4,7 @@
   "description": "The Elect API",
   "main": "app.js",
   "scripts": {
-     "prestart": "npm run -s build",
+    "prestart": "npm run -s build",
     "start": "npm run apidoc && node dist/index.js",
     "dev": "npm run apidoc && nodemon src/api/index.js --exec \"node -r dotenv/config -r babel-register\"",
     "apidoc": "apidoc -i src/api/routes/ -o src/public/apidoc",
@@ -36,7 +36,8 @@
     "jsonwebtoken": "^8.3.0",
     "lodash": "^4.17.11",
     "mongoose": "^5.3.11",
-    "morgan": "^1.9.0"
+    "morgan": "^1.9.0",
+    "rimraf": "^2.6.2"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
