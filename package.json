@@ -37,7 +37,17 @@
     "lodash": "^4.17.11",
     "mongoose": "^5.3.11",
     "morgan": "^1.9.0",
-    "rimraf": "^2.6.2"
+    "rimraf": "^2.6.2",
+    "babel-cli": "^6.26.0",
+    "babel-eslint": "^8.2.3",
+    "babel-plugin-inline-import": "^2.0.6",
+    "babel-plugin-transform-async-to-module-method": "^6.24.1",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-preset-env": "^1.6.1",
+    "babel-register": "^6.26.0",
+    "babel-runtime": "^6.26.0"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
