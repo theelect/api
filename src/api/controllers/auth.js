@@ -54,7 +54,7 @@ const ensureAuthenticated = async (req, res, next) => {
 const login = async (req, res) => {
   try {
     const schema = Joi.object().keys({
-      email: Joi.email().required(),
+      email: Joi.string().email().required(),
       password: Joi.string().required(),
       device: Joi.string().required(),
    });
