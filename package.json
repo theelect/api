@@ -4,12 +4,14 @@
   "description": "The Elect API",
   "main": "app.js",
   "scripts": {
-    "start": "npm run apidoc  && nodemon src/index.js --exec babel-node --presets env",
-    "dev": "npm run apidoc  && nodemon src/index.js --exec babel-node --presets env",
-    "build": "babel src -d dist --source-maps inline --copy-files",
-    "serve": "node dist/index.js",
+     "prestart": "npm run -s build",
+    "start": "npm run apidoc && node dist/index.js",
+    "dev": "npm run apidoc && nodemon src/api/index.js --exec \"node -r dotenv/config -r babel-register\"",
     "apidoc": "apidoc -i src/api/routes/ -o src/public/apidoc",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "clean": "rimraf dist",
+    "build": "npm run clean && mkdir -p dist && babel src -s -D -d dist",
+    "test": "jest --watch",
+    "lint": "esw -w src test"
   },
   "apidoc": {
     "title": "The Elect API documentation",
