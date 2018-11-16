@@ -2,11 +2,15 @@ import boom from 'boom';
 import Joi from 'joi';
 import User from '../models/user';
 
+const userByToken = async (req, res) => {
+  res.status(200).json(req.user);
+}
+
 const getAll = async (req, res) => {
-    try {
-      if (req.user.role === 'viewer') {
-        throw boom.unauthorized('You do not have permission to create campaign.');
-      }
+  try {
+    if (req.user.role === 'viewer' || req.user.role === 'wc') {
+      throw boom.unauthorized('You do not have right permission.');
+    }
     const users = await User.find({ campaign: req.campaign });
     res.status(200).json(users);
   } catch (error) {
@@ -34,7 +38,7 @@ const disableOrEnable = async (req, res) => {
   }
   const {is_active} = value;
   try {
-    if (req.user.role === 'viewer') {
+    if (req.user.role === 'wc' || req.user.role === 'viewer') {
       throw boom.unauthorized('You do not have permission to disable a user account.');
     }
     const user = await User.findOneAndUpdate({ '_id':id, 'campaign': req.campaign }, { $set: { is_active } }, { new: true });
@@ -43,6 +47,7 @@ const disableOrEnable = async (req, res) => {
     }
     res.status(200).json(user);
   } catch (error) {
+    boom.boomify(error);
     const err = new Error();
     err.status = error.status || error.output.statusCode || 500;
     err.message = error.message || 'Internal server error';
@@ -53,4 +58,5 @@ const disableOrEnable = async (req, res) => {
 export default {
   getAll,
   disableOrEnable,
+  userByToken,
 };
