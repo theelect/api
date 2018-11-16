@@ -9,8 +9,26 @@ const { Schema } = mongoose;
 const userSchema = new Schema({
   email: {
     type: String,
-    required: [true, 'Username is required.'],
+    required: [true, 'Email is required.'],
     unique: true,    
+  },
+  first_name: {
+    type: String,
+  },
+  last_name: {
+    type: String,
+  },
+  phone: {
+    type: String,
+  },
+  vin:  {
+    type: String,
+  },
+  ward: {
+    type: String,
+  },
+  lga: {
+    String,
   },
   password: {
     type: String,
@@ -19,7 +37,7 @@ const userSchema = new Schema({
   },
   role: {
     type: String,
-    enum: ['admin', 'editor','viewer'],
+    enum: ['super-admin', 'admin', 'viewer', 'wc'],
     default: 'viewer',
   },
   is_active: {
@@ -30,6 +48,15 @@ const userSchema = new Schema({
     type: String,
     required: true,
   },
+  password_reset_code: {
+      code: {
+        type: String,
+      },
+      created: {
+        type: Date,
+        default: Date.now,
+      },
+    },
   tokens: [{
       access: {
         type: String,
@@ -50,7 +77,8 @@ userSchema.methods = {
   toJSON() {
     const userObject = this.toObject();
     return pick(userObject, [
-      '_id', 'email', 'role', 'is_active',
+      '_id', 'email', 'role', 'is_active', 'first_name', 'last_name',
+      'phone', 'vin', 'ward', 'lga',
     ]);
   },
 
@@ -93,7 +121,7 @@ userSchema.statics = {
   findByCredentials(email, password) {
     return this.findOne({ email }).then((user) => {
       if (!user) {
-        const err = new Error('Username not found');
+        const err = new Error('Email not found');
         err.status = 404;
         boom.boomify(err);
         return Promise.reject(err);
