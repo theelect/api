@@ -191,6 +191,58 @@ export default (app) => {
   app.get('/api/v1/pvc', Auth.ensureAuthenticated, Auth.ensureCampaign, PVC.getAll);
 
 
+        /**
+ * @api {get} /pvc/lgas Get all local government with total number of pvc collected
+ * @apiGroup PVC
+ * * @apiHeader {String} Authorization Users unique token.
+ * @apiHeaderExample {json} Request-Example:
+                 { "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1YmVhOTk3NjY4YjM3OTMyYWExNDEzODUiLCJhY2Nlc3MiOiJhdXRoIiwiaWF0IjoxNTQyMTAxMzY3fQ.090xmsDngmmn_G5EJbNLi6O3I3D_5h30BEiwjldxH7g",
+                "apiKey": "i871KgLg8Xm6FRKHGWCdBpaDHGEGjDJD"}
+ * @apiSuccessExample {json} Success
+ *    HTTP/1.1 200 OK
+ * {
+ *   [
+ *     {
+ *       "_id": "ogbaru",
+ *       "total": 1
+ *     },
+ *     {
+ *       "_id": "ayamelum",
+ *       "total": 1
+ *     }
+ *    ]
+ *  }
+ * @apiErrorExample {json} List error
+ *    HTTP/1.1 500 Bad Request
+ * {
+ *   "status": 500,
+ *   "message": "Internal server error"
+ *  }
+ */
+app.get('/api/v1/pvc/lgas', Auth.ensureAuthenticated, Auth.ensureCampaign, PVC.lga);
+
+ /**
+ * @api {get} /pvc/occupation Get list of occupations in collected pvc
+ * @apiGroup PVC
+ * * @apiHeader {String} Authorization Users unique token.
+ * @apiHeaderExample {json} Request-Example:
+                 { "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1YmVhOTk3NjY4YjM3OTMyYWExNDEzODUiLCJhY2Nlc3MiOiJhdXRoIiwiaWF0IjoxNTQyMTAxMzY3fQ.090xmsDngmmn_G5EJbNLi6O3I3D_5h30BEiwjldxH7g",
+                "apiKey": "i871KgLg8Xm6FRKHGWCdBpaDHGEGjDJD"}
+ * @apiSuccessExample {json} Success
+ *    HTTP/1.1 200 OK
+ *   [
+ *    "business",
+ *     "farming/fishing"
+ *    ]
+ * @apiErrorExample {json} List error
+ *    HTTP/1.1 500 Bad Request
+ * {
+ *   "status": 500,
+ *   "message": "Internal server error"
+ *  }
+ */
+app.get('/api/v1/pvc/occupation', Auth.ensureAuthenticated, Auth.ensureCampaign, PVC.occupation);
+
    /**
  * @api {post} /pvc/:id Get PVC by id
  * @apiGroup PVC
@@ -283,4 +335,6 @@ export default (app) => {
  *  }
  */
   app.get('/api/v1/pvc/:id', Auth.ensureAuthenticated, Auth.ensureCampaign, PVC.get);
+
+   
 };
