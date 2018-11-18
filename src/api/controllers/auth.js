@@ -83,7 +83,7 @@ const login = async (req, res) => {
     throw boom.unauthorized('You do not have permission on this platform');
   } 
   const token = await user.generateAuthToken();
-  return res.status(200).json({token });
+  return res.status(200).json({ token });
   } catch (error) {
     boom.boomify(error);
     const err = new Error();
@@ -212,7 +212,7 @@ const updatePassword = async (req, res) => {
     }
     user.password = password;
     await user.save();
-    res.status(200).send({ status: 1, message: 'Password updated.' });
+    res.status(200).send({ message: 'Password updated.' });
   } catch (err) {
     boom.boomify(error);
     const err = new Error();

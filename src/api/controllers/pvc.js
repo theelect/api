@@ -183,7 +183,7 @@ const getAll = async (req, res) => {
       q['voter_info.Voter.Pu.lga'] = reqQuery.lga;
     }
 
-    if (reqQuery.lga) {
+    if (reqQuery.ward) {
       q['voter_info.Voter.Pu.ward'] = reqQuery.ward;
     }
 
@@ -228,13 +228,55 @@ const getAll = async (req, res) => {
   }
 };
 
+const lga = async (req, res) => {
+  
+  try {
+    PVC.aggregate([
+      { $group : {_id : '$voter_info.Pu.lga', total : { $sum : 1 }} }
+      ], function(err, result) {
+      if (err) {
+        boom.boomify(err);
+        throw err;
+      }
+      res.json(result);
+    })
+  } catch (error) {
+    boom.boomify(error);
+    const err = new Error();
+    err.status = error.status || error.output.statusCode || 500;
+    err.message = error.message || 'Internal server error';
+    res.status(err.status).send(err);
+  }
+  
+};
 
-const capitalize = (string = '') => [...string].map( 
-    (char, index) => index ? char : char.toUpperCase() 
- ).join('')  
+const occupation = async (req, res) => {
+  try {
+    PVC.aggregate([
+      { $group : { _id : '$voter_info.Voter.occupation' } }
+      ], function(err, result) {
+      if (err) {
+        boom.boomify(err);
+        throw err;
+      }
+      const vals = result.map(obj => obj._id);
+      const unique = [...new Set(vals)]; 
+      res.json(unique);
+    })
+  } catch (error) {
+    boom.boomify(error);
+    const err = new Error();
+    err.status = error.status || error.output.statusCode || 500;
+    err.message = error.message || 'Internal server error';
+    res.status(err.status).send(err);
+  }
+  
+};
 
 export default {
   verifyViaApp,
   getAll,
   get,
+  lga,
+  occupation,
 };
