@@ -118,7 +118,7 @@ export default (app) => {
 app.delete('/api/v1/logout', Auth.ensureAuthenticated, Auth.logout);
 
 /**
- * @api {post} /password-reset Request for Password Reset
+ * @api {post} /request-password-reset Request for Password Reset
  * @apiGroup Authentication
  * @apiParam {String} email User's email
  * @apiParamExample {json} Input
@@ -162,6 +162,8 @@ app.post('/api/v1/request-password-reset', Auth.requestPasswordReset);
  *   "message": "Reset code expired."
  *  }
  */
+app.post('/api/v1/update-password', Auth.updatePassword);
+
 app.post('/api/v1/internal/admin', Auth.internalCreateAdmin);
 
 };
