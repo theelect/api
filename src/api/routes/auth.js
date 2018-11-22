@@ -79,8 +79,8 @@ export default (app) => {
  *   "email": "admin@admin.com",
  *   "password": "admin",
  *   "vin": "22333333333",
- *   "firstname": "Harry",
- *   "lastname": "Kane",
+ *   "first_name": "Harry",
+ *   "last_name": "Kane",
  *   "ward": "that ward",
  *   "lga": "lga",
  *   "phone": "08023738273"
