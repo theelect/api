@@ -69,8 +69,8 @@ export default (app) => {
  * @apiParam {String} email User's email
  * @apiParam {String} password User's password
  * @apiParam {String} vin User's voters card vin
- * @apiParam {String} firstname User's first name
- * @apiParam {String} lastname User's last name
+ * @apiParam {String} first_name User's first name
+ * @apiParam {String} last_name User's last name
  * @apiParam {String} ward User's ward
  * @apiParam {String} lga User's local govt area
  * @apiParam {String} phone User's phone number
