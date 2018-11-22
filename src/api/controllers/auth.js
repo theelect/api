@@ -227,8 +227,8 @@ const createWC = async (req, res) => {
     const schema = Joi.object().keys({
       email: Joi.string().email().required(),
       password: Joi.string().required(),
-      lastname: Joi.string().required(),
-      firstname: Joi.string().required(),
+      last_name: Joi.string().required(),
+      first_name: Joi.string().required(),
       phone: Joi.string().required(),
       vin: Joi.string().required(),
       ward: Joi.string().required(),
