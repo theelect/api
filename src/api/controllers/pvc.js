@@ -228,11 +228,38 @@ const getAll = async (req, res) => {
   }
 };
 
-const lga = async (req, res) => {
+const statistics = async (req, res) => {
   
   try {
+    const schema = Joi.object().keys({
+      type: Joi.string().required(),
+    });
+
+    const { value, error } = Joi.validate(req.query, schema);
+    if (error && error.details) {
+      let message = 'Enter type as post parameter.';
+      if (error.details[0]) {
+        message = error.details[0].message
+      }
+      throw boom.badRequest(message);
+    }
+
+    const { type } = value;
+    let q = {};
+    if (type === 'gender') {
+      q = { $group : {'_id': '$voter_info.Voter.gender', 'count' : { $sum : 1 }} };
+    } else if (type === 'ward') {
+      q = { $group : {'_id': '$voter_info.Pu.ward', 'count' : { $sum : 1 }} };
+    } else if (type === 'occupation') {
+      q = { $group : {'_id': '$voter_info.Voter.occupation', 'count' : { $sum : 1 }} };
+    } else {
+      q = { $group : {'_id': '$voter_info.Pu.lga', 'count' : { $sum : 1 }} };
+    }
+    const total_pvc = await PVC.count();
     PVC.aggregate([
-      { $group : {_id : '$voter_info.Pu.lga', total : { $sum : 1 }} }
+      q,
+      {$project: { 'count': '$count', 'percentage': {'$multiply': [ {'$divide': [100, total_pvc]}, '$count' ]}} },
+      {$sort: { percentage: 1 }},
       ], function(err, result) {
       if (err) {
         boom.boomify(err);
@@ -277,6 +304,6 @@ export default {
   verifyViaApp,
   getAll,
   get,
-  lga,
   occupation,
+  statistics,
 };
