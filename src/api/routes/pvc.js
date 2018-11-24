@@ -192,24 +192,27 @@ export default (app) => {
 
 
         /**
- * @api {get} /pvc/lgas Get all local government with total number of pvc collected
+ * @api {get} /pvc/statistics?type=occupation Get pvc grouped by a field with count and percentage
  * @apiGroup PVC
  * * @apiHeader {String} Authorization Users unique token.
  * @apiHeaderExample {json} Request-Example:
                  { "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1YmVhOTk3NjY4YjM3OTMyYWExNDEzODUiLCJhY2Nlc3MiOiJhdXRoIiwiaWF0IjoxNTQyMTAxMzY3fQ.090xmsDngmmn_G5EJbNLi6O3I3D_5h30BEiwjldxH7g",
                 "apiKey": "i871KgLg8Xm6FRKHGWCdBpaDHGEGjDJD"}
+ * @apiParam {String} type Field to group by. type can be gender, occupation, lga or ward. Defaults to lga if no type 
  * @apiSuccessExample {json} Success
  *    HTTP/1.1 200 OK
  * {
  *   [
- *     {
- *       "_id": "ogbaru",
- *       "total": 1
- *     },
- *     {
- *       "_id": "ayamelum",
- *       "total": 1
- *     }
+ *      {
+ *       "_id": "business",
+ *       "count": 1,
+ *       "percentage": 50
+ *   },
+ *   {
+ *       "_id": "farming/fishing",
+ *       "count": 1,
+ *       "percentage": 50
+ *   }
  *    ]
  *  }
  * @apiErrorExample {json} List error
@@ -219,7 +222,7 @@ export default (app) => {
  *   "message": "Internal server error"
  *  }
  */
-app.get('/api/v1/pvc/lgas', Auth.ensureAuthenticated, Auth.ensureCampaign, PVC.lga);
+app.get('/api/v1/pvc/statistics', Auth.ensureAuthenticated, Auth.ensureCampaign, PVC.statistics);
 
  /**
  * @api {get} /pvc/occupation Get list of occupations in collected pvc
