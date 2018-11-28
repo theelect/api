@@ -125,6 +125,56 @@ const get = async (req, res) => {
   }
 };
 
+// {
+//     "last_name" : "Okonkwo",
+//     "first_name" : "ugochukwu",
+//     "state_id" : "4",
+//     "phone" : "08089965525",
+//     "vin" : "962133",
+//     "other_names" : "kingsley",
+//     "gender" : "male",
+//     "occupation" : "business",
+//     "state_name" : "anambra",
+//     "createdAt" : ISODate("2018-11-23T10:46:14.193Z"),
+//     "updatedAt" : ISODate("2018-11-23T10:46:14.193Z"),
+// }
+
+const smsAPIGet = async (req, res) => {
+  try {
+    const { page, perPage } = req.query;
+    const options = {
+      page: parseInt(page, 10) || 1,
+      perPage: parseInt(perPage, 10) || 10,
+      lean: true
+    }
+    const pvcs = await PVC.paginate({}, options);
+    const contacts = [];
+    pvcs.docs.forEach((pvc) => {
+      contacts.push({
+        last_name: pvc.last_name,
+        first_name: pvc.first_name,
+        state_id: pvc.state_id,
+        phone: pvc.phone,
+        vin: pvc.vin,
+        other_names: pvc.voter_info.Voter.other_names,
+        gender: pvc.voter_info.Voter.gender,
+        occupation: pvc.voter_info.Voter.occupation,
+        state_name: pvc.voter_info.State.name,
+        createdAt: pvc.createdAt,
+        updatedAt: pvc.updatedAt
+      });
+    });
+    pvcs.docs = contacts
+    res.status(200).json(pvcs);
+  } catch (error) {
+    boom.boomify(error);
+    const err = new Error();
+    err.status = error.status || error.output.statusCode || 500;
+    err.message = error.message || 'Internal server error';
+    res.status(err.status).send(err);
+  }
+};
+
 const getAll = async (req, res) => {
   try {
     let q = { };
@@ -307,4 +357,5 @@ export default {
   get,
   occupation,
   statistics,
+  smsAPIGet,
 };
