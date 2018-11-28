@@ -126,8 +126,8 @@ export default (app) => {
  * @apiParam (Query string) {String} campaign
  * @apiParam (Query string) {String} state_id
  * @apiParam (Query string) {String} state_name 
- * @apiParam (Query string) {String} lga Query by local government area
- * @apiParam (Query string) {String} ward Query by ward
+ * @apiParam (Query string) {String} lga Query by local government area. If more than one, use comma separated string e.g lga=ayamelum,ogbaru
+ * @apiParam (Query string) {String} ward Query by ward. If more than one, use comma separated string e.g ward=ayamelum,ogbaru
  * @apiParam (Query string) {String} entry_start_date Query date range (start date) based on Date PVC was saved on our DB
  * @apiParam (Query string) {String} entry_end_date Query date range (end date) based on Date PVC was saved on our DB
  * @apiParam (Query string) {String} pvc_registration_start_date Query based on date (start date for a range) pvc was registered
