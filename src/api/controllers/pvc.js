@@ -180,11 +180,13 @@ const getAll = async (req, res) => {
     }
 
     if (reqQuery.lga) {
-      q['voter_info.Voter.Pu.lga'] = reqQuery.lga;
+      const lgas = reqQuery.lga.split(',');
+      q['voter_info.Pu.lga'] = { '$in': lgas };
     }
 
     if (reqQuery.ward) {
-      q['voter_info.Voter.Pu.ward'] = reqQuery.ward;
+      const wards = reqQuery.ward.split(',');
+      q['voter_info.Pu.ward'] = { '$in': wards };
     }
 
     if (reqQuery.entry_start_date && reqQuery.entry_end_date) {
@@ -216,7 +218,6 @@ const getAll = async (req, res) => {
         $lte: new Date(reqQuery.pvc_registration_end_date),
       }
     }
-
     const pvcs = await PVC.paginate(q, options);
     res.status(200).json(pvcs);
   } catch (error) {
