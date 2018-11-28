@@ -136,19 +136,23 @@ const smsAPIGet = async (req, res) => {
     const pvcs = await PVC.paginate({}, options);
     const contacts = [];
     pvcs.docs.forEach((pvc) => {
-      contacts.push({
-        last_name: pvc.last_name,
-        first_name: pvc.voter_info.Voter.first_name || '',
-        state_id: pvc.state_id,
-        phone: pvc.phone,
-        vin: pvc.vin,
-        other_names: pvc.voter_info.Voter.other_names || '',
-        gender: pvc.voter_info.Voter.gender || '',
-        occupation: pvc.voter_info.Voter.occupation || '',
-        state_name: pvc.voter_info.State.name || '',
-        createdAt: pvc.createdAt,
-        updatedAt: pvc.updatedAt
-      });
+      const val = {};
+      val.last_name = pvc.last_name;
+      val.state_id = pvc.state_id;
+      val.phone = pvc.phone;
+      val.vin = pvc.vin;
+      if (pvc.voter_info) {
+        if (pvc.voter_info.Voter) {
+          val.first_name = pvc.voter_info.Voter.first_name || '';
+          val.other_names = pvc.voter_info.Voter.other_names || '';
+          val.gender = pvc.voter_info.Voter.gender || '';
+          val.occupation = pvc.voter_info.Voter.occupation || '';
+        }
+        if (pvc.voter_info.State) {
+          val.state_name = pvc.voter_info.State.name || '';
+        }
+      }
+      contacts.push(val);
     });
     pvcs.docs = contacts
     res.status(200).json(pvcs);
