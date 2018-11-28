@@ -218,7 +218,6 @@ const getAll = async (req, res) => {
         $lte: new Date(reqQuery.pvc_registration_end_date),
       }
     }
-    console.log(q);
     const pvcs = await PVC.paginate(q, options);
     res.status(200).json(pvcs);
   } catch (error) {
