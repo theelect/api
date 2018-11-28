@@ -247,7 +247,7 @@ app.get('/api/v1/pvc/statistics', Auth.ensureAuthenticated, Auth.ensureCampaign,
 app.get('/api/v1/pvc/occupation', Auth.ensureAuthenticated, Auth.ensureCampaign, PVC.occupation);
 
    /**
- * @api {post} /pvc/:id Get PVC by id
+ * @api {get} /pvc/:id Get PVC by id
  * @apiGroup PVC
  * * @apiHeader {String} Authorization Users unique token.
  * @apiHeaderExample {json} Request-Example:
