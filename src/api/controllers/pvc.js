@@ -125,20 +125,6 @@ const get = async (req, res) => {
   }
 };
 
-// {
-//     "last_name" : "Okonkwo",
-//     "first_name" : "ugochukwu",
-//     "state_id" : "4",
-//     "phone" : "08089965525",
-//     "vin" : "962133",
-//     "other_names" : "kingsley",
-//     "gender" : "male",
-//     "occupation" : "business",
-//     "state_name" : "anambra",
-//     "createdAt" : ISODate("2018-11-23T10:46:14.193Z"),
-//     "updatedAt" : ISODate("2018-11-23T10:46:14.193Z"),
-// }
-
 const smsAPIGet = async (req, res) => {
   try {
     const { page, perPage } = req.query;
