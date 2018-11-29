@@ -25,6 +25,7 @@ const verifyViaApp = async (req, res) => {
       ward: Joi.string(),
       dob: Joi.string(),
       polling_unit: Joi.string(),
+      vin_full: Joi.string(),
     });
     const { value, error } = Joi.validate(req.body, schema);
     if (error && error.details) {
