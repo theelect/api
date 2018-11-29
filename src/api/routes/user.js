@@ -97,4 +97,32 @@ export default (app) => {
  *  }
  */
   app.get('/api/v1/user', Auth.ensureAuthenticated, User.userByToken);
+
+/**
+ * @api {get} /user/:id Get user by id
+ * @apiGroup User
+ * @apiHeader {String} Authorization Users unique token.
+ * @apiSuccess {String} _id ID of user
+ * @apiSuccess {String} email Email of user
+ * @apiSuccess {String} role Role of user
+ * @apiSuccess {String} is_active Status of user
+ * @apiSuccessExample {json} Success
+ *    HTTP/1.1 200 OK
+ *   {
+ *     _id": "5beeeda3971bbc4a6c699565",
+ *      "email": "larry@admin.com",
+ *      "role": "wc",
+ *      "is_active": true,
+ *      "phone": "08023738273",
+ *      "vin": "22333333333",
+ *      "ward": "that ward"
+ *   },
+ * @apiErrorExample {json} List error
+ *    HTTP/1.1 400 Bad Request
+ * {
+ *   "status": 500,
+ *   "message": "Request failed."
+ *  }
+ */
+  app.get('/api/v1/user/:id', User.userById);
 };
