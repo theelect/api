@@ -102,6 +102,9 @@ const createAdmin = async (req, res) => {
       email: Joi.string().email().required(),
       password: Joi.string().required(),
       role: Joi.string().required(),
+      first_name: Joi.string(),
+      last_name: Joi.string(),
+      phone: Joi.string(),
     });
 
     const { value, error } = Joi.validate(req.body, schema);
@@ -112,9 +115,9 @@ const createAdmin = async (req, res) => {
       }
       throw boom.badRequest(message);
     }
-    value.last_name = req.body.last_name;
-    value.first_name = req.body.first_name;
-    value.phone = req.body.phone;
+    // value.last_name = req.body.last_name;
+    // value.first_name = req.body.first_name;
+    // value.phone = req.body.phone;
     const { email } = value;
     const existingUser = await User.findOne({ email });
     if (existingUser) {
