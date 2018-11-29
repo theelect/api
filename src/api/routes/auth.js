@@ -29,7 +29,7 @@ export default (app) => {
     app.post('/api/v1/login', Auth.login);
 
   /**
- * @api {post} /create-admin Create user account
+ * @api {post} /admin/create Create user account
  * @apiGroup Authentication
  * @apiHeader {String} Authorization Users unique token.
  * @apiHeader {String} apiKey Campaign apiKey.
@@ -58,7 +58,7 @@ export default (app) => {
  *   "message": "email already exist"
  *  }
  */
-    app.post('/api/v1/create-admin', Auth.ensureAuthenticated, Auth.ensureCampaign, Auth.createAdmin);
+    app.post('/api/v1/admin/create', Auth.ensureAuthenticated, Auth.ensureCampaign, Auth.createAdmin);
 
   /**
  * @api {post} /create-wc Create ward coordinator
