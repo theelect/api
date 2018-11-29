@@ -11,7 +11,7 @@ const getAll = async (req, res) => {
     if (req.user.role === 'viewer' || req.user.role === 'wc') {
       throw boom.unauthorized('You do not have right permission.');
     }
-    const users = await User.find({ campaign: req.campaign });
+    const users = await User.find({ campaign: req.campaign, role: { $ne: 'super-admin' } });
     res.status(200).json(users);
   } catch (error) {
     boom.boomify(error);
