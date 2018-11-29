@@ -22,6 +22,22 @@ const getAll = async (req, res) => {
   }
 };
 
+const userById = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      throw boom.notFound('User not found');
+    }
+    res.status(200).json(user);
+  } catch(error) {
+    boom.boomify(error);
+    const err = new Error();
+    err.status = error.status || error.output.statusCode || 500;
+    err.message = error.message || 'Internal server error';
+    res.status(err.status).send(err);
+  }
+}
+
 const disableOrEnable = async (req, res) => {
   const { id } = req.params;
   const schema = Joi.object().keys({
@@ -59,4 +75,5 @@ export default {
   getAll,
   disableOrEnable,
   userByToken,
+  userById,
 };
