@@ -4,6 +4,9 @@ import mongoosePaginate from 'mongoose-paginate';
 const { Schema } = mongoose;
 
 const pvcSchema = new Schema({
+  vin_full: {
+    type: String,
+  },
   vin: {
     type: String,
     unique: true,
