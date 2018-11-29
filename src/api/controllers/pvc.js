@@ -36,7 +36,7 @@ const verifyViaApp = async (req, res) => {
     }
     let { state_id, phone, last_name, vin } = value;
     if (value.dob) {
-      value.dob = Date(value.dob);
+      value.dob = new Date(value.dob);
     }
 
     if(value.latitude && value.longitude) {
@@ -71,7 +71,6 @@ const verifyViaApp = async (req, res) => {
       if (!value.state) {
         throw boom.badRequest('State is required!');
       }
-      console.log(value.state);
       let index = Helpers.states_in_nigeria.indexOf(value.state.toLowerCase()) + 1;
       state_id = index.toString();
     }
@@ -80,7 +79,7 @@ const verifyViaApp = async (req, res) => {
     params.append('state_id', state_id);
     params.append('last_name', last_name.toLowerCase());
     params.append('vin', vin);
-    console.log(params);
+   
     const url = "http://voters.inecnigeria.org/Api/checkVoter";
     const response = await fetch(url, { method: 'post',
         body:    params,
@@ -112,15 +111,15 @@ const verifyViaApp = async (req, res) => {
         });
       }
       pvc.voter_info = voter_info;
-      if (!value.ward) {
+      if (!value.ward || value.ward === '') {
         if (pvc.voter_info.Pu) {
-          value.ward = pvc.voter_info.Pu.ward;
+          pvc.ward = pvc.voter_info.Pu.ward;
         }
       }
     }
     
     await pvc.save();
-    const message =  pvc.is_verified ?'PVC verification was successful' : 'PVC verification failed';
+    const message =  pvc.is_verified ? 'PVC verification was successful' : 'PVC verification failed';
     res.status(200).json(pvc);
   } catch (error) {
     boom.boomify(error);
