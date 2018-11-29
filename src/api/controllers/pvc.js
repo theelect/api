@@ -339,6 +339,66 @@ const getAll = async (req, res) => {
   }
 };
 
+const count = async (req, res) => {
+  try {
+    let q = { };
+    const reqQuery = req.query;
+    if (reqQuery.gender) {
+      q['gender'] = reqQuery.gender;
+    }
+
+    if (reqQuery.profession) {
+      q['profession'] = { "$regex": reqQuery.profession, "$options": "i" };
+    }
+
+    if (reqQuery.submitted_by) {
+      q['submitted_by'] = reqQuery.submitted_by;
+    }
+
+    if (reqQuery.first_name) {
+      q['first_name'] = reqQuery.first_name;
+    }
+
+    if (reqQuery.last_name) {
+      q['last_name'] = reqQuery.last_name;
+    }
+
+    if (reqQuery.campaign) {
+      q['campaign'] = reqQuery.campaign;
+    }
+
+    if (reqQuery.state_name) {
+      q['state'] = reqQuery.state_name;
+    }
+
+    if (reqQuery.lga) {
+      const lgas = reqQuery.lga.split(',');
+      q['lga'] = { '$in': lgas };
+    }
+
+    if (reqQuery.ward) {
+      const wards = reqQuery.ward.split(',');
+      q['ward'] = { '$in': wards };
+    }
+
+    const total_verified = await PVC.count(q).and({ is_verified: true });
+    const total_unverified = await PVC.count(q).and({is_verified: false });
+    
+    const result = {
+      total_verified,
+      total_unverified
+    };
+    res.status(200).json(result);
+  } catch (error) {
+    boom.boomify(error);
+    const err = new Error();
+    err.status = error.status || error.output.statusCode || 500;
+    err.message = error.message || 'Internal server error';
+    res.status(err.status).send(err);
+  }
+  
+};
+
 const statistics = async (req, res) => {
   
   try {
@@ -419,4 +479,5 @@ export default {
   statistics,
   smsAPIGet,
   create,
+  count
 };
