@@ -4,7 +4,6 @@ const states_in_nigeria = [
   "adamawa",
   "akwa ibom",
   "anambra",
-  "akwa Ibom",
   "bauchi",
   "bayelsa",
   "benue",
