@@ -130,7 +130,7 @@ const smsAPIGet = async (req, res) => {
     const { page, perPage } = req.query;
     const options = {
       page: parseInt(page, 10) || 1,
-      perPage: parseInt(perPage, 10) || 10,
+      limit: parseInt(perPage, 10) || 10,
       lean: true
     }
     const pvcs = await PVC.paginate({}, options);
@@ -172,7 +172,7 @@ const getAll = async (req, res) => {
     const { page, perPage } = reqQuery;
     const options = {
       page: parseInt(page, 10) || 1,
-      perPage: parseInt(perPage, 10) || 10,
+      limit: parseInt(perPage, 10) || 10,
     }
 
     if (reqQuery.gender) {
