@@ -11,16 +11,35 @@ const pvcSchema = new Schema({
   },
   last_name: {
     type: String,
-    required: true,
   },
-  state_id: {
+  first_name: {
     type: String,
-    required: true,
+  },
+  other_names: {
+    type: String
+  },
+  state: {
+   type: String 
+  },
+  lga: { type: String },
+  geo: {
+    type: { type: String, enum: 'Point', default: 'Point' },
+    coordinates: { type: [Number], default: [0,0] }, // [lng, lat]
+  },
+  latitude: {
+    type: Number,
+  },
+  longitude: {
+    type: Number,
+  },
+  ward: {
+    type: String,
   },
   is_verified: {
     type: Boolean,
     default: false,
   },
+
   verification_error: {
     type: String,
     default: null,
@@ -30,6 +49,15 @@ const pvcSchema = new Schema({
     unique: true,
     required: true,
   },
+  gender: {
+    type: String,
+  },
+  profession: {
+    type: String,
+  },
+  dob: {
+    type: Date,
+  },
   campaign: {
     type: Schema.Types.ObjectId,
     default: null,
@@ -38,6 +66,9 @@ const pvcSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'User',
     default: null
+  },
+  polling_unit: {
+    type: String,
   },
   voter_info: {}
 },{

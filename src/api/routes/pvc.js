@@ -56,45 +56,31 @@ export default (app) => {
  * @apiSuccessExample {json} Success
  *    HTTP/1.1 200 OK
  * {
- *   "is_verified": true,
- *   "verification_error": null,
- *   "campaign": "5beaadf9d421bd36bfa6a547",
- *   "submitted_by": "5beec36638dc2e3f2b09bb7a",
- *   "_id": "5beed9133f187845f51a6380",
- *   "state_id": "4",
- *   "vin": "962133",
- *   "phone": "03010",
- *   "last_name": "Okonkwo",
- *   "voter_info": {
- *       "Voter": {
- *           "id": "6207741",
- *           "vin": "90F5B05837295962133",
- *           "pu_id": "11641",
- *           "delimitation": "04/16/05/017",
- *           "state_id": "4",
- *           "last_name": "okonkwo",
- *           "first_name": "ugochukwu",
- *           "other_names": "kingsley",
- *           "gender": "male",
- *           "occupation": "business",
- *           "int_created": "2011-01-25 14:28:53"
- *       },
- *       "State": {
- *           "id": "4",
- *           "name": "anambra",
- *           "abbreviation": "04"
- *       },
- *       "Pu": {
- *           "pu": "ihioma",
- *           "ward": "iyiowa/odekpe/ohita",
- *           "lga": "ogbaru",
- *           "state": "anambra",
- *           "delim": "04/16/05/017"
- *       }
- *   },
- *   "createdAt": "2018-11-16T14:49:55.291Z",
- *   "updatedAt": "2018-11-16T14:49:55.291Z",
- *   "__v": 0
+ *    "geo": {
+                "type": "Point",
+                "coordinates": [
+                    6.43,
+                    4.33
+                ]
+            },
+            "is_verified": true,
+            "verification_error": null,
+            "campaign": "5beaadf9d421bd36bfa6a547",
+            "submitted_by": "5beec36638dc2e3f2b09bb7a",
+            "_id": "5bffe189be9c13bc87438004",
+            "state": "Anambra",
+            "phone": "03839373830108",
+            "last_name": "Okonkwo",
+            "first_name": "Oduma",
+            "vin": "962133",
+            "lga": "okau",
+            "latitude": 4.33,
+            "longitude": 6.43,
+            "gender": "male",
+            "profession": "teacher",
+            "createdAt": "2018-11-29T12:54:33.247Z",
+            "updatedAt": "2018-11-29T12:54:33.247Z",
+            "__v": 0
  *  }
  * @apiErrorExample {json} List error
  *    HTTP/1.1 400 Bad Request
@@ -140,45 +126,33 @@ export default (app) => {
  *   "page": 1,
  *   "pages": 1
  *   "doc": [
- *    "is_verified": true,
- *    "verification_error": null,
- *    "campaign": "5beaadf9d421bd36bfa6a547",
- *    "submitted_by": "5beec36638dc2e3f2b09bb7a",
- *    "_id": "5beed9133f187845f51a6380",
- *    "state_id": "4",
- *    "vin": "962133",
- *    "phone": "03010",
- *    "last_name": "Okonkwo",
- *    "voter_info": {
- *       "Voter": {
- *           "id": "6207741",
- *           "vin": "90F5B05837295962133",
- *           "pu_id": "11641",
- *           "delimitation": "04/16/05/017",
- *           "state_id": "4",
- *           "last_name": "okonkwo",
- *           "first_name": "ugochukwu",
- *           "other_names": "kingsley",
- *           "gender": "male",
- *           "occupation": "business",
- *           "int_created": "2011-01-25 14:28:53"
- *       },
- *       "State": {
- *           "id": "4",
- *           "name": "anambra",
- *           "abbreviation": "04"
- *       },
- *       "Pu": {
- *           "pu": "ihioma",
- *           "ward": "iyiowa/odekpe/ohita",
- *           "lga": "ogbaru",
- *           "state": "anambra",
- *           "delim": "04/16/05/017"
- *       }
- *   },
- *   "createdAt": "2018-11-16T14:49:55.291Z",
- *   "updatedAt": "2018-11-16T14:49:55.291Z",
- *   "__v": 0  
+ *    {
+ *      "geo": {
+                "type": "Point",
+                "coordinates": [
+                    6.43,
+                    4.33
+                ]
+            },
+            "is_verified": true,
+            "verification_error": null,
+            "campaign": "5beaadf9d421bd36bfa6a547",
+            "submitted_by": "5beec36638dc2e3f2b09bb7a",
+            "_id": "5bffe189be9c13bc87438004",
+            "state": "Anambra",
+            "phone": "03839373830108",
+            "last_name": "Okonkwo",
+            "first_name": "Oduma",
+            "vin": "962133",
+            "lga": "okau",
+            "latitude": 4.33,
+            "longitude": 6.43,
+            "gender": "male",
+            "profession": "teacher",
+            "createdAt": "2018-11-29T12:54:33.247Z",
+            "updatedAt": "2018-11-29T12:54:33.247Z",
+            "__v": 0
+ *    }
  *   ]
  *  }
  * @apiErrorExample {json} List error
@@ -290,46 +264,32 @@ app.get('/api/v1/pvc/occupation', Auth.ensureAuthenticated, Auth.ensureCampaign,
  * @apiSuccessExample {json} Success
  *    HTTP/1.1 200 OK
  * {
- *   "is_verified": true,
- *   "verification_error": null,
- *   "campaign": "5beaadf9d421bd36bfa6a547",
- *   "submitted_by": "5beec36638dc2e3f2b09bb7a",
- *   "_id": "5beed9133f187845f51a6380",
- *   "state_id": "4",
- *   "vin": "962133",
- *   "phone": "03010",
- *   "last_name": "Okonkwo",
- *   "voter_info": {
- *       "Voter": {
- *           "id": "6207741",
- *           "vin": "90F5B05837295962133",
- *           "pu_id": "11641",
- *           "delimitation": "04/16/05/017",
- *           "state_id": "4",
- *           "last_name": "okonkwo",
- *           "first_name": "ugochukwu",
- *           "other_names": "kingsley",
- *           "gender": "male",
- *           "occupation": "business",
- *           "int_created": "2011-01-25 14:28:53"
- *       },
- *       "State": {
- *           "id": "4",
- *           "name": "anambra",
- *           "abbreviation": "04"
- *       },
- *       "Pu": {
- *           "pu": "ihioma",
- *           "ward": "iyiowa/odekpe/ohita",
- *           "lga": "ogbaru",
- *           "state": "anambra",
- *           "delim": "04/16/05/017"
- *       }
- *   },
- *   "createdAt": "2018-11-16T14:49:55.291Z",
- *   "updatedAt": "2018-11-16T14:49:55.291Z",
- *   "__v": 0
- *  }
+ * "geo": {
+                "type": "Point",
+                "coordinates": [
+                    6.43,
+                    4.33
+                ]
+            },
+            "is_verified": true,
+            "verification_error": null,
+            "campaign": "5beaadf9d421bd36bfa6a547",
+            "submitted_by": "5beec36638dc2e3f2b09bb7a",
+            "_id": "5bffe189be9c13bc87438004",
+            "state": "Anambra",
+            "phone": "03839373830108",
+            "last_name": "Okonkwo",
+            "first_name": "Oduma",
+            "vin": "962133",
+            "lga": "okau",
+            "latitude": 4.33,
+            "longitude": 6.43,
+            "gender": "male",
+            "profession": "teacher",
+            "createdAt": "2018-11-29T12:54:33.247Z",
+            "updatedAt": "2018-11-29T12:54:33.247Z",
+            "__v": 0
+ * }
  * @apiErrorExample {json} List error
  *    HTTP/1.1 400 Bad Request
  * {
@@ -340,5 +300,6 @@ app.get('/api/v1/pvc/occupation', Auth.ensureAuthenticated, Auth.ensureCampaign,
   app.get('/api/v1/pvc/:id', Auth.ensureAuthenticated, Auth.ensureCampaign, PVC.get);
 
  app.get('/api/v1/contacts', PVC.smsAPIGet);
+ app.post('/api/v1/pvc/create', PVC.create);
    
 };

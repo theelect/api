@@ -5,14 +5,26 @@ import fetch from 'node-fetch';
 import _ from 'lodash';
 import { URLSearchParams } from 'url';
 import PVC from '../models/pvc';
+import Helpers from './helpers';
 
 const verifyViaApp = async (req, res) => {
   try {
     const schema = Joi.object().keys({
-      state_id: Joi.string().required(),
+      state: Joi.string(),
+      state_id: Joi.string(),
       phone: Joi.string().required(),
       last_name: Joi.string().required(),
+      first_name: Joi.string(),
       vin: Joi.string().required(),
+      other_name: Joi.string(),
+      lga: Joi.string(),
+      latitude: Joi.number(),
+      longitude: Joi.number(),
+      gender: Joi.string(),
+      profession: Joi.string(),
+      ward: Joi.string(),
+      dob: Joi.string(),
+      polling_unit: Joi.string(),
     });
     const { value, error } = Joi.validate(req.body, schema);
     if (error && error.details) {
@@ -22,14 +34,26 @@ const verifyViaApp = async (req, res) => {
       }
       throw boom.badRequest(message);
     }
-    const { state_id, phone, last_name, vin } = value;
+    let { state_id, phone, last_name, vin } = value;
+    if (value.dob) {
+      value.dob = Date(value.dob);
+    }
 
+    if(value.latitude && value.longitude) {
+      value.geo = {
+        coordinates: [value.longitude, value.latitude]
+      };
+    }
+    
     //Check if Vin already exist
     const existPVC = await PVC.findOne({ vin });
     if (existPVC && existPVC.is_verified) {
       throw boom.badRequest('Vin already exist in DB ');
     }
    
+   /* PVC exists but is not verified
+      Maybe we can get more information
+   */
     if (existPVC && !existPVC.is_verified) {
       await existPVC.remove();
     }
@@ -43,50 +67,112 @@ const verifyViaApp = async (req, res) => {
     if (existingPhone && !existingPhone.is_verified) {
       await existingPhone.remove();
     }
-
+    if (!state_id) {
+      if (!value.state) {
+        throw boom.badRequest('State is required!');
+      }
+      console.log(value.state);
+      let index = Helpers.states_in_nigeria.indexOf(value.state.toLowerCase()) + 1;
+      state_id = index.toString();
+    }
+    
     const params = new URLSearchParams();
     params.append('state_id', state_id);
-    params.append('last_name', last_name);
+    params.append('last_name', last_name.toLowerCase());
     params.append('vin', vin);
-
+    console.log(params);
     const url = "http://voters.inecnigeria.org/Api/checkVoter";
     const response = await fetch(url, { method: 'post',
         body:    params,
         headers: { 'Authorization': process.env.PVC_VERIFICATION_KEY }, });
     const json = await response.json();
     
+    
     if (json.error) {
-      value.campaign = req.campaign || null;
-      value.submitted_by = req.user._id || null;
       value.is_verified = false;
       value.verification_error = json.message;
-      const pvc = new PVC(value);
-      await pvc.save();
-      const error = new Error(json.message);
-      boom.boomify(error, { statusCode: 400 });
-      throw error;
+    } else {
+      value.is_verified = true;
     }
 
     value.campaign = req.campaign || null;
     value.submitted_by = req.user._id || null;
-    value.is_verified = true;
+    
     const pvc = new PVC(value);
 
     let voter_info = {}
+    if (json.voterInfo) {
+      //Change all values to lower case to aid query during GET
+      for (const key of Object.keys(json.voterInfo)) {
+        voter_info[key] = _.mapValues(json.voterInfo[key], function(s, i) {
+          if (i === 'vin') {
+            return s;
+          }
+          return _.isString(s) ? s.toLowerCase() : s;
+        });
+      }
+      pvc.voter_info = voter_info;
+      if (!value.ward) {
+        value.ward = json.voterInfo.Pu.ward;
+      }
+    }
+    
+    await pvc.save();
+    const message =  pvc.is_verified ?'PVC verification was successful' : 'PVC verification failed';
+    res.status(200).json(pvc);
+  } catch (error) {
+    boom.boomify(error);
+    const err = new Error();
+    err.status = error.status || error.output.statusCode || 500;
+    err.message = error.message || 'Internal server error';
+    res.status(err.status).send(err);
+  }
+};
 
-    //Change all values to lower case to aid query during GET
-    for (const key of Object.keys(json.voterInfo)) {
-      voter_info[key] = _.mapValues(json.voterInfo[key], function(s, i) {
-        if (i === 'vin') {
-          return s;
-        }
-        return _.isString(s) ? s.toLowerCase() : s;
-      });
+const create = async (req, res) => {
+  try {
+    const schema = Joi.object().keys({
+      state: Joi.string(),
+      state_id: Joi.string(),
+      phone: Joi.string().required(),
+      last_name: Joi.string().required(),
+      first_name: Joi.string(),
+      vin: Joi.string().required(),
+      other_name: Joi.string(),
+      lga: Joi.string(),
+      latitude: Joi.number(),
+      longitude: Joi.number(),
+      gender: Joi.string(),
+      profession: Joi.string(),
+      dob: Joi.string(),
+      ward: Joi.string(),
+      polling_unit: Joi.string(),
+    });
+    const { value, error } = Joi.validate(req.body, schema);
+    if (error && error.details) {
+      let message = 'Some required fields are missing.';
+      if (error.details[0]) {
+        message = error.details[0].message
+      }
+      throw boom.badRequest(message);
     }
 
-    pvc.voter_info = voter_info;
+    if (value.dob) {
+      value.dob = Date(value.dob);
+    }
+  
+    if(value.latitude && value.longitude) {
+      value.geo = {
+        coordinates: [value.longitude, value.latitude]
+      };
+    }
+    value.campaign = req.campaign || null;
+    if (req.user) {
+      value.submitted_by = req.user._id || null;
+    }
+    const pvc = new PVC(value);
     await pvc.save();
-    res.status(200).json(pvc);
+    res.status(200).json({success: true});
   } catch (error) {
     boom.boomify(error);
     const err = new Error();
@@ -141,17 +227,11 @@ const smsAPIGet = async (req, res) => {
       val.state_id = pvc.state_id;
       val.phone = pvc.phone;
       val.vin = pvc.vin;
-      if (pvc.voter_info) {
-        if (pvc.voter_info.Voter) {
-          val.first_name = pvc.voter_info.Voter.first_name || '';
-          val.other_names = pvc.voter_info.Voter.other_names || '';
-          val.gender = pvc.voter_info.Voter.gender || '';
-          val.occupation = pvc.voter_info.Voter.occupation || '';
-        }
-        if (pvc.voter_info.State) {
-          val.state_name = pvc.voter_info.State.name || '';
-        }
-      }
+      val.first_name = pvc.first_name;
+      val.other_names = pvc.other_names;
+      val.gender = pvc.gender;
+      val.occupation = pvc.profession;
+      val.state_name = pvc.state; 
       contacts.push(val);
     });
     pvcs.docs = contacts
@@ -173,14 +253,15 @@ const getAll = async (req, res) => {
     const options = {
       page: parseInt(page, 10) || 1,
       limit: parseInt(perPage, 10) || 10,
+      select: '-voter_info'
     }
 
     if (reqQuery.gender) {
-      q['voter_info.Voter.gender'] = reqQuery.gender;
+      q['gender'] = reqQuery.gender;
     }
 
-    if (reqQuery.occupation) {
-      q['voter_info.Voter.occupation'] = { "$regex": reqQuery.occupation, "$options": "i" };
+    if (reqQuery.profession) {
+      q['profession'] = { "$regex": reqQuery.profession, "$options": "i" };
     }
 
     if (reqQuery.is_verified) {
@@ -192,7 +273,7 @@ const getAll = async (req, res) => {
     }
 
     if (reqQuery.first_name) {
-      q['voter_info.Voter.first_name'] = reqQuery.first_name;
+      q['first_name'] = reqQuery.first_name;
     }
 
     if (reqQuery.last_name) {
@@ -211,22 +292,18 @@ const getAll = async (req, res) => {
       q['campaign'] = reqQuery.campaign;
     }
 
-    if (reqQuery.state_id) {
-      q['state_id'] = reqQuery.state_id;
-    }
-
     if (reqQuery.state_name) {
-      q['voter_info.Voter.State.name'] = reqQuery.state_name;
+      q['state'] = reqQuery.state_name;
     }
 
     if (reqQuery.lga) {
       const lgas = reqQuery.lga.split(',');
-      q['voter_info.Pu.lga'] = { '$in': lgas };
+      q['lga'] = { '$in': lgas };
     }
 
     if (reqQuery.ward) {
       const wards = reqQuery.ward.split(',');
-      q['voter_info.Pu.ward'] = { '$in': wards };
+      q['ward'] = { '$in': wards };
     }
 
     if (reqQuery.entry_start_date && reqQuery.entry_end_date) {
@@ -242,22 +319,9 @@ const getAll = async (req, res) => {
       q['created_at'] = {
         $lte: new Date(reqQuery.entry_end_date),
       }
+    
     }
 
-     if (reqQuery.pvc_registration_start_date && reqQuery.pvc_registration_end_date) {
-      q['voter_info.Voter.int_created'] = {
-        $gte: new Date(reqQuery.pvc_registration_start_date),
-        $lte: new Date(reqQuery.pvc_registration_end_date),
-      }
-    } else if (reqQuery.pvc_registration_start_date) {
-      q['voter_info.Voter.int_created'] = {
-        $gte: new Date(reqQuery.pvc_registration_start_date),
-      }
-    } else if (reqQuery.pvc_registration_end_date) {
-      q['voter_info.Voter.int_created'] = {
-        $lte: new Date(reqQuery.pvc_registration_end_date),
-      }
-    }
     const pvcs = await PVC.paginate(q, options);
     res.status(200).json(pvcs);
   } catch (error) {
@@ -288,13 +352,13 @@ const statistics = async (req, res) => {
     const { type } = value;
     let q = {};
     if (type === 'gender') {
-      q = { $group : {'_id': '$voter_info.Voter.gender', 'count' : { $sum : 1 }} };
+      q = { $group : {'_id': '$gender', 'count' : { $sum : 1 }} };
     } else if (type === 'ward') {
-      q = { $group : {'_id': '$voter_info.Pu.ward', 'count' : { $sum : 1 }} };
+      q = { $group : {'_id': '$ward', 'count' : { $sum : 1 }} };
     } else if (type === 'occupation') {
-      q = { $group : {'_id': '$voter_info.Voter.occupation', 'count' : { $sum : 1 }} };
+      q = { $group : {'_id': '$profession', 'count' : { $sum : 1 }} };
     } else {
-      q = { $group : {'_id': '$voter_info.Pu.lga', 'count' : { $sum : 1 }} };
+      q = { $group : {'_id': '$lga', 'count' : { $sum : 1 }} };
     }
     const total_pvc = await PVC.count();
     PVC.aggregate([
@@ -321,7 +385,7 @@ const statistics = async (req, res) => {
 const occupation = async (req, res) => {
   try {
     PVC.aggregate([
-      { $group : { _id : '$voter_info.Voter.occupation' } }
+      { $group : { _id : '$profession' } }
       ], function(err, result) {
       if (err) {
         boom.boomify(err);
@@ -348,4 +412,5 @@ export default {
   occupation,
   statistics,
   smsAPIGet,
+  create,
 };
