@@ -301,5 +301,5 @@ app.get('/api/v1/pvc/occupation', Auth.ensureAuthenticated, Auth.ensureCampaign,
 
  app.get('/api/v1/contacts', PVC.smsAPIGet);
  app.post('/api/v1/pvc/create', PVC.create);
-   
 };
+// https://theelect.herokuapp.com/api/v1/pvc/verify_by_sms
