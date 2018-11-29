@@ -113,7 +113,9 @@ const verifyViaApp = async (req, res) => {
       }
       pvc.voter_info = voter_info;
       if (!value.ward) {
-        value.ward = json.voterInfo.Pu.ward;
+        if (pvc.voter_info.Pu) {
+          value.ward = pvc.voter_info.Pu.ward;
+        }
       }
     }
     
