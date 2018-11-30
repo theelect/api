@@ -5,6 +5,7 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import Routes from './api/routes';
+import Helpers from './api/controllers/helpers';
 
 require('dotenv').config();
 
@@ -59,5 +60,7 @@ app.get('/', (req, res) => {
 });
 
 Routes(app);
+
+// Helpers.cron();
 
 export default app;
