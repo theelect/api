@@ -1,6 +1,7 @@
 import Joi from 'joi';
 import boom from 'boom';
 import request from 'request';
+import moment from 'moment';
 import fetch from 'node-fetch';
 import _ from 'lodash';
 import { URLSearchParams } from 'url';
@@ -160,7 +161,7 @@ const create = async (req, res) => {
     }
 
     if (value.dob) {
-      value.dob = Date(value.dob);
+      value.dob = new Date(value.dob);
     }
   
     if(value.latitude && value.longitude) {
@@ -399,6 +400,57 @@ const count = async (req, res) => {
   
 };
 
+const age_statistics = async (req, res) => {
+  try {
+    const date = new Date();
+    const age18_30 = await PVC.count({
+      dob: {
+        $gte: moment(date).subtract(30, 'years'),
+        $lte: moment(date).subtract(18, 'years')
+      }
+    });
+    const age31_40 = await PVC.count({
+      dob: {
+        $gte: moment(date).subtract(40, 'years'),
+        $lte: moment(date).subtract(31, 'years')
+      }
+    });
+    const age41_50 = await PVC.count({
+      dob: {
+        $gte: moment(date).subtract(50, 'years'),
+        $lte: moment(date).subtract(41, 'years')
+      }
+    });
+    const age51_60 = await PVC.count({
+      dob: {
+        $gte: moment(date).subtract(60, 'years'),
+        $lte: moment(date).subtract(51, 'years')
+      }
+    });
+    const age61_100 = await PVC.count({
+      dob: {
+        $gte: moment(date).subtract(100, 'years'),
+        $lte: moment(date).subtract(61, 'years')
+      }
+    });
+
+    const result = {
+      '18-30': age18_30,
+      '31-40': age31_40,
+      '41-50': age41_50,
+      '51-60': age51_60,
+      '61-100': age61_100,
+    }
+    res.status(200).send(result);
+  } catch (error) {
+    boom.boomify(error);
+    const err = new Error();
+    err.status = error.status || error.output.statusCode || 500;
+    err.message = error.message || 'Internal server error';
+    res.status(err.status).send(err);
+  }
+}
+
 const statistics = async (req, res) => {
   
   try {
@@ -471,6 +523,123 @@ const occupation = async (req, res) => {
   
 };
 
+const verify_via_sms = async (req, res) => {
+  try {
+    if (!req.body.text) {
+      return res.status(400).send();
+    }
+    const texts = req.body.text.split(' ');
+    let vin = null;
+    let state_id = null;
+    let last_name = null;
+    let phone = null;
+
+    if (texts[1] && texts[2] && texts[3]) {
+      vin = texts[1];
+      state_id = texts[2];
+      last_name = texts[3];
+      phone = texts[4];
+    } else {
+      return res.status(400).send();
+    }
+// 
+    const value = {
+      vin: vin,
+      state_id: state_id,
+      last_name: last_name,
+      phone: phone,
+      dob: _.random(1940, 2000).toString(),
+    };
+
+    //Check if Vin already exist
+    const existPVC = await PVC.findOne({ vin });
+    if (existPVC && existPVC.is_verified) {
+      return res.status(400).send();
+    }
+   
+   /* PVC exists but is not verified
+      Maybe we can get more information
+   */
+    if (existPVC && !existPVC.is_verified) {
+      await existPVC.remove();
+    }
+
+    //Verification Passed But Phone is Duplicate
+    const existingPhone = await PVC.findOne({ phone });
+    if (existingPhone && existingPhone.is_verified) {
+      return res.status(400).send();
+    }
+
+    if (existingPhone && !existingPhone.is_verified) {
+      await existingPhone.remove();
+    }
+    
+    const params = new URLSearchParams();
+    params.append('state_id', state_id);
+    params.append('last_name', last_name.toLowerCase());
+    params.append('vin', vin);
+   
+    const url = "http://voters.inecnigeria.org/Api/checkVoter";
+    const response = await fetch(url, { method: 'post',
+        body:    params,
+        headers: { 'Authorization': process.env.PVC_VERIFICATION_KEY }, });
+    const json = await response.json();
+    
+    if (json.error) {
+      value.is_verified = false;
+      value.verification_error = json.message;
+    } else {
+      value.is_verified = true;
+    }
+
+    if (value.dob) {
+      value.dob = new Date(value.dob);
+    }
+    
+    const pvc = new PVC(value);
+
+    let voter_info = {}
+    if (json.voterInfo) {
+      //Change all values to lower case to aid query during GET
+      for (const key of Object.keys(json.voterInfo)) {
+        voter_info[key] = _.mapValues(json.voterInfo[key], function(s, i) {
+          if (i === 'vin') {
+            return s;
+          }
+          return _.isString(s) ? s.toLowerCase() : s;
+        });
+      }
+      pvc.voter_info = voter_info;
+      if (!value.ward || value.ward === '') {
+        if (pvc.voter_info.Pu) {
+          pvc.ward = pvc.voter_info.Pu.ward;
+          pvc.lga = pvc.voter_info.Pu.lga;
+          pvc.state = pvc.voter_info.Pu.state;
+        }
+      }
+      if (!value.first_name) {
+        if (pvc.voter_info.Voter) {
+          pvc.first_name = pvc.voter_info.Voter.first_name;
+          pvc.other_name = pvc.voter_info.Voter.other_name;
+          pvc.gender = pvc.voter_info.Voter.gender;
+          pvc.profession = pvc.voter_info.Voter.occupation;
+        }
+      }
+    }
+    
+    await pvc.save();
+    const message =  pvc.is_verified ? 'PVC verification was successful' : 'PVC verification failed';
+    res.status(200).send();
+
+  } catch (error) {
+    boom.boomify(error);
+    const err = new Error();
+    err.status = error.status || error.output.statusCode || 500;
+    err.message = error.message || 'Internal server error';
+    res.status(err.status).send(err);
+  }
+};
+
 export default {
   verifyViaApp,
   getAll,
@@ -479,5 +648,7 @@ export default {
   statistics,
   smsAPIGet,
   create,
-  count
+  count,
+  verify_via_sms,
+  age_statistics,
 };

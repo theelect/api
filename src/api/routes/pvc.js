@@ -220,6 +220,12 @@ app.get('/api/v1/pvc/statistics', Auth.ensureAuthenticated, Auth.ensureCampaign,
  */
 app.get('/api/v1/pvc/occupation', Auth.ensureAuthenticated, Auth.ensureCampaign, PVC.occupation);
 
+ app.get('/api/v1/contacts', PVC.smsAPIGet);
+ app.post('/api/v1/pvc/create', PVC.create);
+ app.get('/api/v1/pvc-count', Auth.ensureAuthenticated, Auth.ensureCampaign, PVC.count);
+ app.post('/api/v1/pvc/verify_by_sms', PVC.verify_via_sms);
+ app.get('/api/v1/pvc/age_statistics', Auth.ensureAuthenticated, Auth.ensureCampaign, PVC.age_statistics);
+
    /**
  * @api {get} /pvc/:id Get PVC by id
  * @apiGroup PVC
@@ -298,9 +304,4 @@ app.get('/api/v1/pvc/occupation', Auth.ensureAuthenticated, Auth.ensureCampaign,
  *  }
  */
   app.get('/api/v1/pvc/:id', Auth.ensureAuthenticated, Auth.ensureCampaign, PVC.get);
-
- app.get('/api/v1/contacts', PVC.smsAPIGet);
- app.post('/api/v1/pvc/create', PVC.create);
- app.get('/api/v1/pvc-count', Auth.ensureAuthenticated, Auth.ensureCampaign, PVC.count);
 };
-// https://theelect.herokuapp.com/api/v1/pvc/verify_by_sms
