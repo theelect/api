@@ -235,6 +235,9 @@ const smsAPIGet = async (req, res) => {
       val.gender = pvc.gender;
       val.occupation = pvc.profession;
       val.state_name = pvc.state; 
+      val.lga = pvc.lga;
+      val.ward = pvc.ward;
+      val.birth_date = pvc.dob;
       contacts.push(val);
     });
     pvcs.docs = contacts
