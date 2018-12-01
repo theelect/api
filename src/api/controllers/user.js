@@ -11,7 +11,7 @@ const getAll = async (req, res) => {
     if (req.user.role === 'viewer' || req.user.role === 'wc') {
       throw boom.unauthorized('You do not have right permission.');
     }
-    const users = await User.find({ campaign: req.campaign });
+    const users = await User.find({ campaign: req.campaign, role: { $ne: 'super-admin' } });
     res.status(200).json(users);
   } catch (error) {
     boom.boomify(error);
@@ -21,6 +21,22 @@ const getAll = async (req, res) => {
     res.status(err.status).send(err);
   }
 };
+
+const userById = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      throw boom.notFound('User not found');
+    }
+    res.status(200).json(user);
+  } catch(error) {
+    boom.boomify(error);
+    const err = new Error();
+    err.status = error.status || error.output.statusCode || 500;
+    err.message = error.message || 'Internal server error';
+    res.status(err.status).send(err);
+  }
+}
 
 const disableOrEnable = async (req, res) => {
   const { id } = req.params;
@@ -59,4 +75,5 @@ export default {
   getAll,
   disableOrEnable,
   userByToken,
+  userById,
 };

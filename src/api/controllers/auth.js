@@ -83,7 +83,7 @@ const login = async (req, res) => {
     throw boom.unauthorized('You do not have permission on this platform');
   } 
   const token = await user.generateAuthToken();
-  return res.status(200).json({token });
+  return res.status(200).json({ token });
   } catch (error) {
     boom.boomify(error);
     const err = new Error();
@@ -102,6 +102,10 @@ const createAdmin = async (req, res) => {
       email: Joi.string().email().required(),
       password: Joi.string().required(),
       role: Joi.string().required(),
+      first_name: Joi.string(),
+      last_name: Joi.string(),
+      phone: Joi.string(),
+      is_active: Joi.boolean()
     });
 
     const { value, error } = Joi.validate(req.body, schema);
@@ -112,7 +116,7 @@ const createAdmin = async (req, res) => {
       }
       throw boom.badRequest(message);
     }
-
+   
     const { email } = value;
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -212,7 +216,7 @@ const updatePassword = async (req, res) => {
     }
     user.password = password;
     await user.save();
-    res.status(200).send({ status: 1, message: 'Password updated.' });
+    res.status(200).send({ message: 'Password updated.' });
   } catch (err) {
     boom.boomify(error);
     const err = new Error();
@@ -227,8 +231,8 @@ const createWC = async (req, res) => {
     const schema = Joi.object().keys({
       email: Joi.string().email().required(),
       password: Joi.string().required(),
-      lastname: Joi.string().required(),
-      firstname: Joi.string().required(),
+      last_name: Joi.string().required(),
+      first_name: Joi.string().required(),
       phone: Joi.string().required(),
       vin: Joi.string().required(),
       ward: Joi.string().required(),

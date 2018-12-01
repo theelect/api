@@ -29,7 +29,7 @@ export default (app) => {
     app.post('/api/v1/login', Auth.login);
 
   /**
- * @api {post} /create-admin Create user account
+ * @api {post} /admin/create Create user account
  * @apiGroup Authentication
  * @apiHeader {String} Authorization Users unique token.
  * @apiHeader {String} apiKey Campaign apiKey.
@@ -58,7 +58,7 @@ export default (app) => {
  *   "message": "email already exist"
  *  }
  */
-    app.post('/api/v1/create-admin', Auth.ensureAuthenticated, Auth.ensureCampaign, Auth.createAdmin);
+    app.post('/api/v1/admin/create', Auth.ensureAuthenticated, Auth.ensureCampaign, Auth.createAdmin);
 
   /**
  * @api {post} /create-wc Create ward coordinator
@@ -69,8 +69,8 @@ export default (app) => {
  * @apiParam {String} email User's email
  * @apiParam {String} password User's password
  * @apiParam {String} vin User's voters card vin
- * @apiParam {String} firstname User's first name
- * @apiParam {String} lastname User's last name
+ * @apiParam {String} first_name User's first name
+ * @apiParam {String} last_name User's last name
  * @apiParam {String} ward User's ward
  * @apiParam {String} lga User's local govt area
  * @apiParam {String} phone User's phone number
@@ -79,8 +79,8 @@ export default (app) => {
  *   "email": "admin@admin.com",
  *   "password": "admin",
  *   "vin": "22333333333",
- *   "firstname": "Harry",
- *   "lastname": "Kane",
+ *   "first_name": "Harry",
+ *   "last_name": "Kane",
  *   "ward": "that ward",
  *   "lga": "lga",
  *   "phone": "08023738273"
@@ -118,7 +118,7 @@ export default (app) => {
 app.delete('/api/v1/logout', Auth.ensureAuthenticated, Auth.logout);
 
 /**
- * @api {post} /password-reset Request for Password Reset
+ * @api {post} /request-password-reset Request for Password Reset
  * @apiGroup Authentication
  * @apiParam {String} email User's email
  * @apiParamExample {json} Input
@@ -162,6 +162,10 @@ app.post('/api/v1/request-password-reset', Auth.requestPasswordReset);
  *   "message": "Reset code expired."
  *  }
  */
+app.post('/api/v1/update-password', Auth.updatePassword);
+
 app.post('/api/v1/internal/admin', Auth.internalCreateAdmin);
+
+
 
 };
