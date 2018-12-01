@@ -328,9 +328,29 @@ const getAll = async (req, res) => {
     
     }
 
+    if (reqQuery.age_min && reqQuery.age_max) {
+      const min = parseInt(reqQuery.age_min, 10);
+      const max = parseInt(reqQuery.age_max, 10);
+      q['dob'] = {
+          $gte: moment(date).subtract(max, 'years'),
+          $lte: moment(date).subtract(min, 'years')
+        }
+    } else if (reqQuery.age_min) {
+      const min = parseInt(reqQuery.age_min, 10);
+      q['dob'] = {
+          $lte: moment(date).subtract(min, 'years')
+        }
+    } else if (reqQuery.age_max) {
+      const max = parseInt(reqQuery.age_max, 10);
+       q['dob'] = {
+          $gte: moment(date).subtract(max, 'years'),
+        }
+    }
+
+
     const pvcs = await PVC.paginate(q, options);
-    const total_verified = await PVC.count({ is_verified: true });
-    const total_unverified = await PVC.count({ is_verified: false });
+    const total_verified = await PVC.count(q).and({ is_verified: true });
+    const total_unverified = await PVC.count(q).and({ is_verified: false });
     pvcs.total_verified = total_verified;
     pvcs.total_unverified = total_unverified;
     res.status(200).json(pvcs);
@@ -347,6 +367,7 @@ const count = async (req, res) => {
   try {
     let q = { };
     const reqQuery = req.query;
+
     if (reqQuery.gender) {
       q['gender'] = reqQuery.gender;
     }
