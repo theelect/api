@@ -349,8 +349,8 @@ const getAll = async (req, res) => {
 
 
     const pvcs = await PVC.paginate(q, options);
-    const total_verified = await PVC.count({ is_verified: true });
-    const total_unverified = await PVC.count({ is_verified: false });
+    const total_verified = await PVC.count(q).and({ is_verified: true });
+    const total_unverified = await PVC.count(q).and({ is_verified: false });
     pvcs.total_verified = total_verified;
     pvcs.total_unverified = total_unverified;
     res.status(200).json(pvcs);
