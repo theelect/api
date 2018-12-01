@@ -225,7 +225,7 @@ app.get('/api/v1/pvc/occupation', Auth.ensureAuthenticated, Auth.ensureCampaign,
  app.get('/api/v1/pvc-count', Auth.ensureAuthenticated, Auth.ensureCampaign, PVC.count);
  app.post('/api/v1/pvc/verify_by_sms', PVC.verify_via_sms);
  app.get('/api/v1/pvc/age_statistics', Auth.ensureAuthenticated, Auth.ensureCampaign, PVC.age_statistics);
-
+ app.get('/api/v1/pvc/count/gender_lga', PVC.lgaAndGenderCount);
    /**
  * @api {get} /pvc/:id Get PVC by id
  * @apiGroup PVC

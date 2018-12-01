@@ -220,6 +220,7 @@ const smsAPIGet = async (req, res) => {
     const options = {
       page: parseInt(page, 10) || 1,
       limit: parseInt(perPage, 10) || 10,
+      sort: '-createdAt',
       lean: true
     }
     const pvcs = await PVC.paginate({}, options);
@@ -259,7 +260,8 @@ const getAll = async (req, res) => {
     const options = {
       page: parseInt(page, 10) || 1,
       limit: parseInt(perPage, 10) || 10,
-      select: '-voter_info'
+      select: '-voter_info',
+      sort: '-createdAt'
     }
 
     if (reqQuery.gender) {
@@ -346,7 +348,6 @@ const getAll = async (req, res) => {
           $gte: moment(date).subtract(max, 'years'),
         }
     }
-
 
     const pvcs = await PVC.paginate(q, options);
     const total_verified = await PVC.count(q).and({ is_verified: true });
@@ -512,6 +513,13 @@ const statistics = async (req, res) => {
         boom.boomify(err);
         throw err;
       }
+      result.forEach((val, index) => {
+        console.log(val._id);
+        if (!val._id) {
+          console.log('### is null');
+          result[index]._id = 'Unknown';
+        }
+      });
       res.json(result);
     })
   } catch (error) {
@@ -547,10 +555,14 @@ const occupation = async (req, res) => {
   
 };
 
+/** 
+ * For some reason sms api require status code to be 200
+ * for all response
+*/
 const verify_via_sms = async (req, res) => {
   try {
     if (!req.body.text) {
-      return res.status(400).send();
+      return res.status(200).send('Verification failed! Text is missing');
     }
     const texts = req.body.text.split(' ');
     let vin = null;
@@ -564,7 +576,7 @@ const verify_via_sms = async (req, res) => {
       last_name = texts[3];
       phone = texts[4];
     } else {
-      return res.status(400).send();
+      return res.status(200).send('Verification failed! Wrong format. Please ensure sms text is in the format: tc vin state-id last-name phone number');
     }
 // 
     const value = {
@@ -578,7 +590,7 @@ const verify_via_sms = async (req, res) => {
     //Check if Vin already exist
     const existPVC = await PVC.findOne({ vin });
     if (existPVC && existPVC.is_verified) {
-      return res.status(400).send();
+      return res.status(200).send('Verification failed! Vin already.');
     }
    
    /* PVC exists but is not verified
@@ -591,7 +603,7 @@ const verify_via_sms = async (req, res) => {
     //Verification Passed But Phone is Duplicate
     const existingPhone = await PVC.findOne({ phone });
     if (existingPhone && existingPhone.is_verified) {
-      return res.status(400).send();
+      return res.status(400).send('Verification failed! Phone number already exist in db');
     }
 
     if (existingPhone && !existingPhone.is_verified) {
@@ -664,7 +676,32 @@ const verify_via_sms = async (req, res) => {
   }
 };
 
+const lgaAndGenderCount = async (req, res) => {
+  try {
+    const male = await PVC.count({ gender: 'male' });
+    const female = await PVC.count({ gender: 'female' });
+    const lgas = await PVC.find().distinct('lga');
+    const total = await PVC.count();
+    const result = {
+      gender: {
+        male: male,
+        female: female
+      },
+      lga: lgas.length,
+      total: total
+    };
+    res.status(200).json(result);
+  } catch (error) {
+    boom.boomify(error);
+    const err = new Error();
+    err.status = error.status || error.output.statusCode || 500;
+    err.message = error.message || 'Internal server error';
+    res.status(err.status).send(err);
+  }
+};
+
 export default {
+  lgaAndGenderCount,
   verifyViaApp,
   getAll,
   get,
