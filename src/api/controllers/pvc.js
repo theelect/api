@@ -569,8 +569,9 @@ const verify_via_sms = async (req, res) => {
     let state_id = null;
     let last_name = null;
     let phone = null;
-
-    if (texts[1] && texts[2] && texts[3]) {
+    console.log('####', text);
+    console.log('@@@@@@', req.body.text);
+    if (texts[1] && texts[2] && texts[3] && texts[4]) {
       vin = texts[1];
       state_id = texts[2];
       last_name = texts[3];
