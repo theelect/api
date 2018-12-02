@@ -570,12 +570,12 @@ const verify_via_sms = async (req, res) => {
     let state_id = null;
     let last_name = null;
     let phone = null;
-    console.log('####', text);
-    if (texts[1] && texts[2] && texts[3] && texts[4]) {
-      vin = texts[1];
-      state_id = texts[2];
-      last_name = texts[3];
-      phone = texts[4];
+    console.log('####', texts);
+    if (texts[0] && texts[1] && texts[2] && texts[3]) {
+      vin = texts[0];
+      state_id = texts[1];
+      last_name = texts[2];
+      phone = texts[3];
     } else {
       return res.status(200).send('Verification failed! Wrong format. Please ensure sms text is in the format: tc vin state-id last-name phone number');
     }
