@@ -560,6 +560,7 @@ const occupation = async (req, res) => {
  * for all response
 */
 const verify_via_sms = async (req, res) => {
+  console.log('@@@@@@', req.body);
   try {
     if (!req.body.text) {
       return res.status(200).send('Verification failed! Text is missing');
@@ -570,7 +571,6 @@ const verify_via_sms = async (req, res) => {
     let last_name = null;
     let phone = null;
     console.log('####', text);
-    console.log('@@@@@@', req.body.text);
     if (texts[1] && texts[2] && texts[3] && texts[4]) {
       vin = texts[1];
       state_id = texts[2];
