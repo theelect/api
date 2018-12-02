@@ -73,6 +73,14 @@ const pvcSchema = new Schema({
   polling_unit: {
     type: String,
   },
+  is_submitted_by_sms: {
+    type: Boolean,
+    default: false
+  },
+  submitted_by_phone_number: {
+    type: String,
+    default: null
+  },
   voter_info: {}
 },{
   timestamps: true

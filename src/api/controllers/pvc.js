@@ -570,21 +570,23 @@ const verify_via_sms = async (req, res) => {
     let last_name = null;
     let phone = null;
 
-    if (texts[1] && texts[2] && texts[3]) {
-      vin = texts[1];
-      state_id = texts[2];
-      last_name = texts[3];
-      phone = texts[4];
+    if (texts[0] && texts[1] && texts[2] && texts[3]) {
+      vin = texts[0];
+      state_id = texts[1];
+      last_name = texts[2];
+      phone = texts[3];
     } else {
       return res.status(200).send('Verification failed! Wrong format. Please ensure sms text is in the format: tc vin state-id last-name phone number');
     }
-// 
+
     const value = {
       vin: vin,
       state_id: state_id,
       last_name: last_name,
       phone: phone,
       dob: _.random(1940, 2000).toString(),
+      is_submitted_by_sms: true,
+      submitted_by_phone_number: req.body.msisdn || null,
     };
 
     //Check if Vin already exist
@@ -631,6 +633,8 @@ const verify_via_sms = async (req, res) => {
     if (value.dob) {
       value.dob = new Date(value.dob);
     }
+
+    console.log(json.error);
     
     const pvc = new PVC(value);
 
@@ -665,7 +669,7 @@ const verify_via_sms = async (req, res) => {
     
     await pvc.save();
     const message =  pvc.is_verified ? 'PVC verification was successful' : 'PVC verification failed';
-    res.status(200).send();
+    res.status(200).send(message);
 
   } catch (error) {
     boom.boomify(error);
