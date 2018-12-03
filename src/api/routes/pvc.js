@@ -5,7 +5,7 @@ export default (app) => {
       /**
  * @api {post} /pvc/verifyViaApp Verify PVC via app
  * @apiGroup PVC
- * * @apiHeader {String} Authorization Users unique token.
+ * @apiHeader {String} Authorization Users unique token.
  * @apiHeaderExample {json} Request-Example:
                  { "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1YmVhOTk3NjY4YjM3OTMyYWExNDEzODUiLCJhY2Nlc3MiOiJhdXRoIiwiaWF0IjoxNTQyMTAxMzY3fQ.090xmsDngmmn_G5EJbNLi6O3I3D_5h30BEiwjldxH7g",
                 "apiKey": "i871KgLg8Xm6FRKHGWCdBpaDHGEGjDJD"}
