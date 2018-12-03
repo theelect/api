@@ -39,7 +39,7 @@ export default (app) => {
   app.get('/api/v1/users', Auth.ensureAuthenticated, Auth.ensureCampaign, User.getAll);
 
       /**
- * @api {get} /user/:id/status Disable or Enable a user
+ * @api {post} /user/:id/status Disable or Enable a user
  * @apiGroup User
  * @apiHeader {String} Authorization Users unique token.
  * @apiHeader {String} apiKey Campaign apiKey.
