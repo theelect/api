@@ -22,6 +22,22 @@ const getAll = async (req, res) => {
   }
 };
 
+const update = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await User.findOneAndUpdate({ '_id': id }, { $set: req.body }, { new: true });
+    if (!user)
+      return res.status(404).send({ message: 'User not found' }); 
+    res.status(200).json(user);
+  } catch (error) {
+    boom.boomify(error);
+    const err = new Error();
+    err.status = error.status || error.output.statusCode || 500;
+    err.message = error.message || 'Internal server error';
+    res.status(err.status).send(err);
+  }
+}
+
 const userById = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
@@ -76,4 +92,5 @@ export default {
   disableOrEnable,
   userByToken,
   userById,
+  update
 };
