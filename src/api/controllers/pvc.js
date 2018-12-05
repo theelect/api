@@ -348,12 +348,15 @@ const getAll = async (req, res) => {
           $gte: moment(date).subtract(max, 'years'),
         }
     }
-
+    
     const pvcs = await PVC.paginate(q, options);
+    const total = await PVC.count(q);
     const total_verified = await PVC.count(q).and({ is_verified: true });
     const total_unverified = await PVC.count(q).and({ is_verified: false });
     pvcs.total_verified = total_verified;
     pvcs.total_unverified = total_unverified;
+    pvcs.total_verified_percentage = Math.round((total_verified/total)*100);
+    pvcs.total_unverified_percentage = Math.round((total_unverified/total)*100);
     res.status(200).json(pvcs);
   } catch (error) {
     boom.boomify(error);
@@ -407,12 +410,16 @@ const count = async (req, res) => {
       q['ward'] = { '$in': wards };
     }
 
+    const total = await PVC.count(q);
     const total_verified = await PVC.count(q).and({ is_verified: true });
-    const total_unverified = await PVC.count(q).and({is_verified: false });
-    
+    const total_unverified = await PVC.count(q).and({ is_verified: false });
+    const total_verified_percentage = Math.round((total_verified/total)*100);
+    const total_unverified_percentage = Math.round((total_unverified/total)*100);
     const result = {
       total_verified,
-      total_unverified
+      total_unverified,
+      total_verified_percentage,
+      total_unverified_percentage
     };
     res.status(200).json(result);
   } catch (error) {
@@ -516,7 +523,6 @@ const statistics = async (req, res) => {
       result.forEach((val, index) => {
         console.log(val._id);
         if (!val._id) {
-          console.log('### is null');
           result[index]._id = 'Unknown';
         }
       });
