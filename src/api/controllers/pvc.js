@@ -330,6 +330,7 @@ const getAll = async (req, res) => {
     
     }
 
+    const date = new Date();
     if (reqQuery.age_min && reqQuery.age_max) {
       const min = parseInt(reqQuery.age_min, 10);
       const max = parseInt(reqQuery.age_max, 10);
