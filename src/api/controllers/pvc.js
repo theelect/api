@@ -356,8 +356,8 @@ const getAll = async (req, res) => {
     const total_unverified = await PVC.count(q).and({ is_verified: false });
     pvcs.total_verified = total_verified;
     pvcs.total_unverified = total_unverified;
-    pvcs.total_verified_percentage = Math.round((total_verified/total)*100);
-    pvcs.total_unverified_percentage = Math.round((total_unverified/total)*100);
+    pvcs.total_verified_percentage = ((total_verified/total)*100).toFixed(2);
+    pvcs.total_unverified_percentage = ((total_unverified/total)*100).toFixed(2);
     res.status(200).json(pvcs);
   } catch (error) {
     boom.boomify(error);
@@ -411,11 +411,31 @@ const count = async (req, res) => {
       q['ward'] = { '$in': wards };
     }
 
+    const date = new Date();
+    if (reqQuery.age_min && reqQuery.age_max) {
+      const min = parseInt(reqQuery.age_min, 10);
+      const max = parseInt(reqQuery.age_max, 10);
+      q['dob'] = {
+          $gte: moment(date).subtract(max, 'years'),
+          $lte: moment(date).subtract(min, 'years')
+        }
+    } else if (reqQuery.age_min) {
+      const min = parseInt(reqQuery.age_min, 10);
+      q['dob'] = {
+          $lte: moment(date).subtract(min, 'years')
+        }
+    } else if (reqQuery.age_max) {
+      const max = parseInt(reqQuery.age_max, 10);
+       q['dob'] = {
+          $gte: moment(date).subtract(max, 'years'),
+        }
+    }
+
     const total = await PVC.count(q);
     const total_verified = await PVC.count(q).and({ is_verified: true });
     const total_unverified = await PVC.count(q).and({ is_verified: false });
-    const total_verified_percentage = Math.round((total_verified/total)*100);
-    const total_unverified_percentage = Math.round((total_unverified/total)*100);
+    const total_verified_percentage = ((total_verified/total)*100).toFixed(2);
+    const total_unverified_percentage = ((total_unverified/total)*100).toFixed(2);
     const result = {
       total_verified,
       total_unverified,
