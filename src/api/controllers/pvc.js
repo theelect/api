@@ -269,7 +269,9 @@ const getAll = async (req, res) => {
     }
 
     if (reqQuery.profession) {
-      q['profession'] = { "$regex": reqQuery.profession, "$options": "i" };
+      const professions = reqQuery.profession.split(',');
+      const regex = professions.join('|');
+      q['profession'] = { "$regex": regex, "$options": "i" };
     }
 
     if (reqQuery.is_verified) {
@@ -331,23 +333,19 @@ const getAll = async (req, res) => {
     }
 
     const date = new Date();
-    if (reqQuery.age_min && reqQuery.age_max) {
-      const min = parseInt(reqQuery.age_min, 10);
-      const max = parseInt(reqQuery.age_max, 10);
-      q['dob'] = {
+    if (reqQuery.age) {
+      let ageQuery = [];
+      const ageRanges = reqQuery.age.split(',');
+      ageRanges.forEach((range) => {
+        const ageLimits = range.split('-');
+        const min = parseInt(ageLimits[0], 10);
+        const max = parseInt(ageLimits[1], 10);
+        ageQuery.push({ dob: {
           $gte: moment(date).subtract(max, 'years'),
           $lte: moment(date).subtract(min, 'years')
-        }
-    } else if (reqQuery.age_min) {
-      const min = parseInt(reqQuery.age_min, 10);
-      q['dob'] = {
-          $lte: moment(date).subtract(min, 'years')
-        }
-    } else if (reqQuery.age_max) {
-      const max = parseInt(reqQuery.age_max, 10);
-       q['dob'] = {
-          $gte: moment(date).subtract(max, 'years'),
-        }
+        }});
+      });
+      q['$or'] = ageQuery;
     }
     
     const pvcs = await PVC.paginate(q, options);
@@ -356,8 +354,14 @@ const getAll = async (req, res) => {
     const total_unverified = await PVC.count(q).and({ is_verified: false });
     pvcs.total_verified = total_verified;
     pvcs.total_unverified = total_unverified;
-    pvcs.total_verified_percentage = ((total_verified/total)*100).toFixed(2);
-    pvcs.total_unverified_percentage = ((total_unverified/total)*100).toFixed(2);
+    if (total > 0) {
+      pvcs.total_verified_percentage = ((total_verified/total)*100).toFixed(2);
+      pvcs.total_unverified_percentage = ((total_unverified/total)*100).toFixed(2);
+    } else {
+      pvcs.total_verified_percentage = 0;
+      pvcs.total_unverified_percentage = 0;
+    }
+    
     res.status(200).json(pvcs);
   } catch (error) {
     boom.boomify(error);
@@ -378,7 +382,9 @@ const count = async (req, res) => {
     }
 
     if (reqQuery.profession) {
-      q['profession'] = { "$regex": reqQuery.profession, "$options": "i" };
+      const professions = reqQuery.profession.split(',');
+      const regex = professions.join('|');
+      q['profession'] = { "$regex": regex, "$options": "i" };
     }
 
     if (reqQuery.submitted_by) {
@@ -412,30 +418,32 @@ const count = async (req, res) => {
     }
 
     const date = new Date();
-    if (reqQuery.age_min && reqQuery.age_max) {
-      const min = parseInt(reqQuery.age_min, 10);
-      const max = parseInt(reqQuery.age_max, 10);
-      q['dob'] = {
+
+    if (reqQuery.age) {
+      let ageQuery = [];
+      const ageRanges = reqQuery.age.split(',');
+      ageRanges.forEach((range) => {
+        const ageLimits = range.split('-');
+        const min = parseInt(ageLimits[0], 10);
+        const max = parseInt(ageLimits[1], 10);
+        ageQuery.push({ dob: {
           $gte: moment(date).subtract(max, 'years'),
           $lte: moment(date).subtract(min, 'years')
-        }
-    } else if (reqQuery.age_min) {
-      const min = parseInt(reqQuery.age_min, 10);
-      q['dob'] = {
-          $lte: moment(date).subtract(min, 'years')
-        }
-    } else if (reqQuery.age_max) {
-      const max = parseInt(reqQuery.age_max, 10);
-       q['dob'] = {
-          $gte: moment(date).subtract(max, 'years'),
-        }
+        }});
+      });
+      q['$or'] = ageQuery;
     }
 
     const total = await PVC.count(q);
     const total_verified = await PVC.count(q).and({ is_verified: true });
     const total_unverified = await PVC.count(q).and({ is_verified: false });
-    const total_verified_percentage = ((total_verified/total)*100).toFixed(2);
-    const total_unverified_percentage = ((total_unverified/total)*100).toFixed(2);
+
+    let total_verified_percentage = 0;
+    let total_unverified_percentage = 0;
+    if (total > 0) {
+      total_verified_percentage = ((total_verified/total)*100).toFixed(2);
+      total_unverified_percentage = ((total_unverified/total)*100).toFixed(2);
+    }
     const result = {
       total_verified,
       total_unverified,
