@@ -4,6 +4,8 @@ import _ from 'lodash';
 import fetch from 'node-fetch';
 import { URLSearchParams } from 'url';
 import PVC from '../models/pvc';
+import LGA from '../models/lga';
+
 // const pool = new pg.Pool();
 const cron = () => {
     const connectionString = 'postgresql://theelect:fightthegoodfight@the-elect-africa.ch1fckjskaiv.us-east-1.rds.amazonaws.com:5432/theelect'
@@ -137,6 +139,55 @@ const verifyViaApp = async (value) => {
   }
 };
 
+const updatePhoneNumbers = async () => {
+  try {
+    const pvcs = await PVC.find();
+    pvcs.forEach((pvc) => {
+      if (pvc.phone.charAt(0) !== '+') {
+        let phone = pvc.phone.substring(1);
+        phone = '+234' + phone;
+        pvc.phone = phone;
+        pvc.save();
+      }
+    })
+  } catch (error) {
+    boom.boomify(error);
+    console.log(error);
+  }
+};
+
+const updateLGA = async () => {
+  try {
+    const pvcs = await PVC.find();
+    pvcs.forEach(async(pvc) => {
+      console.log('### loop');
+      if (!pvc.lga_id) {
+        console.log('@@@ if', pvc.lga);
+        const lga = await LGA.findOne({ name: pvc.lga });
+        console.log('$$$$ if', lga);
+        if (lga) { 
+        console.log('###', lga._id);
+        pvc.lga_id = lga._id;
+        await pvc.save();
+      }
+        
+      }
+    })
+  } catch (error) {
+    boom.boomify(error);
+    console.log(error);
+  }
+};
+
+
+
+export default {
+  states_in_nigeria,
+  cron,
+  updatePhoneNumbers,
+  updateLGA,
+};
+
 const wards = [ 
         "choba", 
         "elelenwo", 
@@ -196,8 +247,3 @@ const states_in_nigeria = [
   "yobe",
   "zamfara"
 ];
-
-export default {
-  states_in_nigeria,
-  cron,
-};

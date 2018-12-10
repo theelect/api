@@ -501,7 +501,7 @@ const age_statistics = async (req, res) => {
       '41-50': age41_50,
       '51-60': age51_60,
       '61-100': age61_100,
-    }
+    };
     res.status(200).send(result);
   } catch (error) {
     boom.boomify(error);

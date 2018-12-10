@@ -135,6 +135,41 @@ const createAdmin = async (req, res) => {
   }
 };
 
+const changePassword = async (req, res) => {
+  try {
+    const schema = Joi.object().keys({
+      new_password: Joi.string().required(),
+      old_password: Joi.string().required(),
+    });
+
+    const { value, error } = Joi.validate(req.body, schema);
+    if (error && error.details) {
+      let message = 'Some required fields are missing';
+      if (error.details[0]) {
+        message = error.details[0].message
+      }
+      throw boom.badRequest(message);
+    }
+    const user = await User.findByCredentials(req.user.email, password);
+    if (!user) {
+      throw boom.notFound('Account with this email and password not found');
+    }
+    if (!user.is_active) {
+      throw boom.unauthorized('This account is disabled');
+    }
+    user.password = new_password;
+    user.tokens = [];
+    await user.save();
+    res.status(200).json({message: 'Password successfully changed.'});
+  } catch (error) {
+    boom.boomify(error);
+    const err = new Error();
+    err.status = error.status || error.output.statusCode || 500;
+    err.message = error.message || 'Internal server error';
+    res.status(err.status).send(err);
+  }
+}
+
 const internalCreateAdmin = async (req, res) => {
   try {
     const schema = Joi.object().keys({
@@ -172,7 +207,7 @@ const internalCreateAdmin = async (req, res) => {
 
 const logout = (req, res) => {
   req.user.removeToken(req.token).then(() => {
-    res.status(204).send();
+    res.status(204).json({ success: true });
   }, () => {
     res.status(400).send();
   });
@@ -278,4 +313,5 @@ export default {
   requestPasswordReset,
   createWC,
   internalCreateAdmin,
+  changePassword,
 };

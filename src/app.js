@@ -59,8 +59,9 @@ app.get('/', (req, res) => {
 	res.json({ message: 'Welcome to Elect application.' });
 });
 
+
 Routes(app);
 
-// Helpers.cron();
+// Helpers.updateLGA();
 
 export default app;

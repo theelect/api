@@ -1,6 +1,7 @@
 import Joi from 'joi';
 import boom from 'boom';
 import LGA from '../models/lga';
+import PVC from '../models/pvc';
 
 const create = async (req, res) => {
   try {
@@ -18,7 +19,6 @@ const create = async (req, res) => {
       throw boom.badRequest(message);
     }
     // value.wards = req.body.wards;
-    console.log('###', value);
     const lga = new LGA(value);
     await lga.save();
     res.status(201).json(lga);
@@ -46,10 +46,43 @@ const getAll = async (req, res) => {
     err.message = error.message || 'Internal server error';
     res.status(err.status).send(err);
   }
-  
+};
+
+const mapData = async (req, res) => {
+  try {
+    const q = { $group : {'_id': '$lga', 'lga_id': { $first: '$lga_id' }, 'count' : { $sum : 1 }} };
+    const total_pvc = await PVC.count();
+    PVC.aggregate([
+      q
+      ], function(err, result) {
+      if (err) {
+        boom.boomify(err);
+        throw err;
+      }
+      let mapJSON = [];
+      const opt = [{lga_id: 'lga'}];
+      LGA.populate(result, {path: "lga_id"}, (err, lgas) => {
+        lgas.forEach((val, index) => {
+          if (val.lga_id) {
+            const json = [val.lga_id.map_code, val.count.toString()];
+            mapJSON.push(json);
+          }
+        });
+        res.status(200).json(mapJSON);
+      });      
+    });
+  } catch (error) {
+    boom.boomify(error);
+    const err = new Error();
+    err.status = error.status || error.output.statusCode || 500;
+    err.message = error.message || 'Internal server error';
+    res.status(err.status).send(err);
+  }
 };
 
 export default {
   create,
   getAll,
+  mapData,
 };
+
