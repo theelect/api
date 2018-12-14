@@ -2,6 +2,7 @@ import Joi from 'joi';
 import boom from 'boom';
 import User from '../models/user';
 import Campaign from '../models/campaign';
+import Mail from './mail';
 
 const generateCellphoneCode = () => {
   const leftNumber = Math.floor(Math.random() * 900) + 100;
