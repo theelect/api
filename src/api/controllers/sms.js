@@ -56,7 +56,11 @@ const sendSMS = async (req, res) => {
     }
 
     if (reqQuery.phone) {
-      q['phone'] = '+' + reqQuery.phone.trim();
+      let p = reqQuery.phone.trim();
+      if (p.charAt(0) !== '+') {
+        p = '+' + p;
+      }
+      q['phone'] = p;
     }
 
     if (reqQuery.vin) {
@@ -127,8 +131,8 @@ const sendSMS = async (req, res) => {
       throw boom.badRequest(message);
     }
     const { message } = value;
-
     const pvcs = await PVC.find(q);
+    
     if (pvcs.length === 0) {
       throw boom.badRequest('No user found for selected query');
     }
@@ -137,7 +141,6 @@ const sendSMS = async (req, res) => {
     const options = {
       to: phones,
       message,
-      enqueue: phones.length > 5000,
     };
     const response = await sms.send(options);
     const recipients = response.SMSMessageData.Recipients;
