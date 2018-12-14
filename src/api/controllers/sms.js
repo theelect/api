@@ -129,6 +129,9 @@ const sendSMS = async (req, res) => {
     const { message } = value;
 
     const pvcs = await PVC.find(q);
+    if (pvcs.length === 0) {
+      throw boom.badRequest('No user found for selected query');
+    }
     const phones = pvcs.map((pvc) => pvc.phone );
     const sms = AfricasTalking.SMS;
     const options = {
