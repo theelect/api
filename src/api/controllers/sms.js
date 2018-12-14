@@ -25,6 +25,7 @@ const getMessages = async (req, res) => {
 };
 
 const sendSMS = async (req, res) => {
+  console.log(credentials);
   try {
     let q = { };
     const reqQuery = req.query;
@@ -141,6 +142,7 @@ const sendSMS = async (req, res) => {
     const options = {
       to: phones,
       message,
+      from: 'TonyeCole'
     };
     const response = await sms.send(options);
     const recipients = response.SMSMessageData.Recipients;
