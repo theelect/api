@@ -245,11 +245,33 @@ const sendSMS = async (req, res) => {
   }
 };
 
+const stats = async (req, res) => {
+  try {
+    const date = new Date(), y = date.getFullYear(), m = date.getMonth();
+    const firstDay = new Date(y, m, 1);
+    const lastDay = new Date(y, m + 1, 0);
+
+    const total_sent_sms = await SMS.count();
+    const total_sent_this_month = await SMS.count({ createdAt: { $gte: firstDay, $lte: lastDay }});
+    res.status(200).json({ 
+      total_sent_sms,
+      total_sent_this_month
+    });
+  } catch (error) {
+    boom.boomify(error);
+    const err = new Error();
+    err.status = error.status || error.output.statusCode || 500;
+    err.message = error.message || 'Internal server error';
+    res.status(err.status).send(err);
+  }
+}
+
 export default { 
   sendSMS, 
   getMessages,
   getScheduledSMS,
   cancelScheduledSMS,
   updateScheduledSMS,
+  stats,
 };
 

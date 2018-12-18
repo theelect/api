@@ -153,7 +153,7 @@ export default (app) => {
  */
   app.patch('/api/v1/sms/scheduled/:id', Auth.ensureAuthenticated, Auth.ensureCampaign, SMS.updateScheduledSMS);
 
-      /** *
+      /**
  *  @api {patch} /sms/scheduled/:id Cancel a Scheduled sms
  *  @apiGroup SMS
  *  @apiSuccessExample {json} Success
@@ -170,4 +170,23 @@ export default (app) => {
  *  }
  */
   app.delete('/api/v1/sms/scheduled/:id', Auth.ensureAuthenticated, Auth.ensureCampaign, SMS.cancelScheduledSMS);
+
+  /** 
+ *  @api {get} /sms-stats Get total sent sms and sms sent for current month
+ *  @apiGroup SMS
+ *  @apiSuccessExample {json} Success
+ *
+ *    HTTP/1.1 200 OK
+ * {
+ *   "total_sent_sms": 24,
+ *   "total_sent_this_month": 24
+ * }
+ * @apiErrorExample {json} List error
+ *    HTTP/1.1 500 Bad Request
+ * {
+ *   "status": 500,
+ *   "message": "Internal server error"
+ *  }
+ */
+  app.get('/api/v1/sms-stats', Auth.ensureAuthenticated, Auth.ensureCampaign, SMS.stats);
 };
