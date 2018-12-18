@@ -2,6 +2,7 @@ import boom from 'boom';
 import Joi from 'joi';
 import PVC from '../models/pvc';
 import SMS from '../models/sms';
+import ScheduledSMS from '../models/scheduledSMS';
 
 const credentials = {
     apiKey: process.env.SMS_APIKEY,
@@ -9,7 +10,71 @@ const credentials = {
 };
 const AfricasTalking = require('africastalking')(credentials);
 
-const sms = AfricasTalking.SMS;
+const getScheduledSMS = async (req, res) => {
+  try {
+    const sms = await ScheduledSMS.find();
+    res.status(200).json(sms);
+  } catch (error) {
+    boom.boomify(error);
+    const err = new Error();
+    err.status = error.status || error.output.statusCode || 500;
+    err.message = error.message || 'Internal server error';
+    res.status(err.status).send(err);
+  }
+}
+
+const cancelScheduledSMS = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const sms = await ScheduledSMS.findById(id);
+    if (!sms) {
+      throw boom.notFound('No scheduled sms with such id was found');
+    }
+    await sms.remove();
+    res.status(200).json({ message: 'Scheduled sms has been canceled.' });
+  } catch (error) {
+    boom.boomify(error);
+    const err = new Error();
+    err.status = error.status || error.output.statusCode || 500;
+    err.message = error.message || 'Internal server error';
+    res.status(err.status).send(err);
+  }
+}
+
+const updateScheduledSMS = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const schema = Joi.object().keys({
+      message: Joi.string().required(),
+      schedule_date: Joi.string(),
+    });
+
+    const { value, error } = Joi.validate(req.body, schema);
+    if (error && error.details) {
+      let message = 'Message is required.';
+      if (error.details[0]) {
+        message = error.details[0].message
+      }
+      throw boom.badRequest(message);
+    }
+    const sms = await ScheduledSMS.findById(id);
+    if (!sms) {
+      throw boom.notFound('No scheduled sms with such id was found');
+    }
+
+    const date = new Date(value.schedule_date);
+    sms.message = value.message;
+    sms.date = date;
+    await sms.save();
+    res.status(200).json(sms);
+  } catch (error) {
+    boom.boomify(error);
+    const err = new Error();
+    err.status = error.status || error.output.statusCode || 500;
+    err.message = error.message || 'Internal server error';
+    res.status(err.status).send(err);
+  }
+}
 
 const getMessages = async (req, res) => {
   try {
@@ -121,6 +186,8 @@ const sendSMS = async (req, res) => {
 
     const schema = Joi.object().keys({
       message: Joi.string().required(),
+      is_scheduled: Joi.boolean().required(),
+      schedule_date: Joi.string(),
     });
 
     const { value, error } = Joi.validate(req.body, schema);
@@ -138,24 +205,38 @@ const sendSMS = async (req, res) => {
       throw boom.badRequest('No user found for selected query');
     }
     const phones = pvcs.map((pvc) => pvc.phone );
-    const sms = AfricasTalking.SMS;
-    const options = {
-      to: phones,
-      message,
-      from: 'TonyeCole'
-    };
-    const response = await sms.send(options);
-    const recipients = response.SMSMessageData.Recipients;
-    const anSMS = new SMS({
-      status: 'Sent',
-      message,
-      number_of_recipient: phones.length,
-      recipients
-    });
-    await anSMS.save();
-    res.status(200).json(response);
+
+    if (value.is_scheduled) {
+      if (!req.body.schedule_date) {
+        throw boom.badRequest('Scheduled sms requires a date');
+      }
+      const date = new Date(value.schedule_date);
+      const scheduledSMS = new ScheduledSMS({
+        message,
+        to: phones,
+        date,
+      });
+      await scheduledSMS.save();
+      res.status(200).json({ message: 'SMS has been scheduled.' });
+    } else {
+      const sms = AfricasTalking.SMS;
+      const options = {
+        to: phones,
+        message,
+        from: 'TonyeCole'
+      };
+      const response = await sms.send(options);
+      const recipients = response.SMSMessageData.Recipients;
+      const anSMS = new SMS({
+        status: 'Sent',
+        message,
+        number_of_recipient: phones.length,
+        recipients
+      });
+      await anSMS.save();
+      res.status(200).json(response);
+    }
   } catch (error) {
-    console.log(error);
     boom.boomify(error);
     const err = new Error();
     err.status = error.status || error.output.statusCode || 500;
@@ -164,5 +245,11 @@ const sendSMS = async (req, res) => {
   }
 };
 
-export default { sendSMS, getMessages };
+export default { 
+  sendSMS, 
+  getMessages,
+  getScheduledSMS,
+  cancelScheduledSMS,
+  updateScheduledSMS,
+};
 

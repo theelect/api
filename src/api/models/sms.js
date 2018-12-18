@@ -30,7 +30,7 @@ const smsSchema = new Schema({
   },
   senders_name: {
     type: String,
-    default: 'Tonye Cole',
+    default: 'TonyeCole',
   },
   number_of_recipient: {
     type: Number,

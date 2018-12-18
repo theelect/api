@@ -6,6 +6,7 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import Routes from './api/routes';
 import Helpers from './api/controllers/helpers';
+import Cron from './api/controllers/cron';
 
 require('dotenv').config();
 
@@ -61,6 +62,7 @@ app.get('/', (req, res) => {
 
 
 Routes(app);
+Cron.scheduleJobs();
 
 // Helpers.updateLGA();
 

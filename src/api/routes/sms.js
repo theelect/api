@@ -22,6 +22,15 @@ export default (app) => {
  * @apiParam (Query string) {String} state_name 
  * @apiParam (Query string) {String} lga Query by local government area. If more than one, use comma separated string e.g lga=ayamelum,ogbaru
  * @apiParam (Query string) {String} ward Query by ward. If more than one, use comma separated string e.g ward=ayamelum,ogbaru
+ * @apiParam {String} message Text message
+ * @apiParam {Boolean} is_scheduled if message should be scheduled or sent immediately
+ * @apiParam {String} schedule_date Date to schedule message in ISO format 2018-12-18T15:05:32.000Z
+ * @apiParamExample {json} Input
+ * {
+ *	"message": "Testing sms sending",
+ *	"is_scheduled": false,
+ *	"schedule_date": "2018-12-18T15:05:32.000Z"
+ * }
  * @apiSuccessExample {json} Success
  *    HTTP/1.1 200 OK
  * {
@@ -82,4 +91,83 @@ export default (app) => {
  *  }
  */
   app.get('/api/v1/sms', Auth.ensureAuthenticated, Auth.ensureCampaign, SMS.getMessages);
+
+  /** *
+ *  @api {get} /sms/scheduled Get Scheduled sms
+ *  @apiGroup SMS
+ *  @apiParamExample {json} Input
+ * {
+ *	"message": "Another one updated sms sending",
+ *	"schedule_date": "2018-12-18T17:05:32.000Z"
+ * }
+ *  @apiSuccessExample {json} Success
+ *
+ *    HTTP/1.1 200 OK
+ * [
+ *   {
+ *       "to": [
+ *           "+2347063226665"
+ *       ],
+ *       "from": "TonyeCole",
+ *       "_id": "5c19200da8be1c8930a06427",
+ *       "message": "Scheduling sms sending",
+ *       "date": "2018-12-18T18:05:32.000Z",
+ *       "createdAt": "2018-12-18T16:27:57.056Z",
+ *       "updatedAt": "2018-12-18T16:27:57.056Z",
+ *       "__v": 0
+ *   }
+ * ]
+ * @apiErrorExample {json} List error
+ *    HTTP/1.1 500 Bad Request
+ * {
+ *   "status": 500,
+ *   "message": "Internal server error"
+ *  }
+ */
+  app.get('/api/v1/sms/scheduled', Auth.ensureAuthenticated, Auth.ensureCampaign, SMS.getScheduledSMS);
+
+    /** *
+ *  @api {patch} /sms/scheduled/:id Update a Scheduled sms. You can only change message or date of the scheduled sms
+ *  @apiGroup SMS
+ *  @apiSuccessExample {json} Success
+ *
+ *    HTTP/1.1 200 OK
+ * {
+ *   "to": [
+ *       "+2347063226665"
+ *   ],
+ *   "from": "TonyeCole",
+ *   "_id": "5c19200da8be1c8930a06427",
+ *   "message": "Another one updated sms sending",
+ *   "date": "2018-12-18T17:05:32.000Z",
+ *   "createdAt": "2018-12-18T16:27:57.056Z",
+ *   "updatedAt": "2018-12-18T16:27:57.056Z",
+ *   "__v": 0
+ * }
+ * @apiErrorExample {json} List error
+ *    HTTP/1.1 500 Bad Request
+ * {
+ *   "status": 500,
+ *   "message": "Internal server error"
+ *  }
+ */
+  app.patch('/api/v1/sms/scheduled/:id', Auth.ensureAuthenticated, Auth.ensureCampaign, SMS.updateScheduledSMS);
+
+      /** *
+ *  @api {patch} /sms/scheduled/:id Cancel a Scheduled sms
+ *  @apiGroup SMS
+ *  @apiSuccessExample {json} Success
+ *
+ *    HTTP/1.1 200 OK
+ * {
+ *   "message": "Scheduled sms has been canceled."
+ * }
+ * @apiErrorExample {json} List error
+ *    HTTP/1.1 500 Bad Request
+ * {
+ *   "status": 500,
+ *   "message": "Internal server error"
+ *  }
+ */
+  app.delete('/api/v1/sms/scheduled/:id', Auth.ensureAuthenticated, Auth.ensureCampaign, SMS.cancelScheduledSMS);
 };
