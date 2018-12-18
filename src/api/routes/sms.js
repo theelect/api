@@ -179,7 +179,8 @@ export default (app) => {
  *    HTTP/1.1 200 OK
  * {
  *   "total_sent_sms": 24,
- *   "total_sent_this_month": 24
+ *   "total_sent_this_month": 24,
+ *   "total_scheduled_sms": 0
  * }
  * @apiErrorExample {json} List error
  *    HTTP/1.1 500 Bad Request
