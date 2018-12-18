@@ -253,7 +253,7 @@ const updatePassword = async (req, res) => {
     user.password = password;
     await user.save();
     res.status(200).send({ message: 'Password updated.' });
-  } catch (err) {
+  } catch (error) {
     boom.boomify(error);
     const err = new Error();
     err.status = error.status || error.output.statusCode || 500;
