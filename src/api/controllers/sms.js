@@ -253,9 +253,11 @@ const stats = async (req, res) => {
 
     const total_sent_sms = await SMS.count();
     const total_sent_this_month = await SMS.count({ createdAt: { $gte: firstDay, $lte: lastDay }});
+    const total_scheduled_sms = await ScheduledSMS.count();
     res.status(200).json({ 
       total_sent_sms,
-      total_sent_this_month
+      total_sent_this_month,
+      total_scheduled_sms
     });
   } catch (error) {
     boom.boomify(error);
