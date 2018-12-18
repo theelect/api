@@ -1,5 +1,6 @@
 import Joi from 'joi';
 import boom from 'boom';
+import moment from 'moment';
 import User from '../models/user';
 import Campaign from '../models/campaign';
 import Mail from './mail';
