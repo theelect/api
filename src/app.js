@@ -24,8 +24,8 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 // parse requests of content-type - application/json
 app.use(bodyParser.json());
-
-app.use(cors());
+app.use(cors({ origin: '*' }));
+// app.use(cors());
 
 app.use(express.static("src/public"));
 

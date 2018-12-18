@@ -25,7 +25,7 @@ const getMessages = async (req, res) => {
 };
 
 const sendSMS = async (req, res) => {
-  console.log(credentials);
+
   try {
     let q = { };
     const reqQuery = req.query;
@@ -155,6 +155,7 @@ const sendSMS = async (req, res) => {
     await anSMS.save();
     res.status(200).json(response);
   } catch (error) {
+    console.log(error);
     boom.boomify(error);
     const err = new Error();
     err.status = error.status || error.output.statusCode || 500;
