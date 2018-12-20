@@ -48,28 +48,24 @@ const getAll = async (req, res) => {
   }
 };
 
+//TODO: Loop is not scalable. Find a good fix!
 const mapData = async (req, res) => {
   try {
-    const q = { $group : {'_id': '$lga', 'lga_id': { $first: '$lga_id' }, 'count' : { $sum : 1 }} };
-    const total_pvc = await PVC.count();
-    PVC.aggregate([
-      q
-      ], function(err, result) {
-      if (err) {
-        boom.boomify(err);
-        throw err;
-      }
-      let mapJSON = [];
-      const opt = [{lga_id: 'lga'}];
-      LGA.populate(result, {path: "lga_id"}, (err, lgas) => {
-        lgas.forEach((val, index) => {
-          if (val.lga_id) {
-            const json = [val.lga_id.map_code, val.count.toString()];
-            mapJSON.push(json);
-          }
-        });
+    // const q = { $group : {'_id': '$lga', 'lga_id': { $first: '$lga_id' }, 'count' : { $sum : 1 }} };
+    const lgas = await LGA.find();
+    console.log('###', lgas);
+    if (lgas.length === 0) {
+      return res.status(200).json(lgas);
+    }
+    let mapJSON = [];
+    lgas.forEach( async (lga, index) => {
+      const count = await PVC.count({ lga: lga.name });
+      const json = [lga.map_code, count.toString()];
+      mapJSON.push(json);
+      if (index === lgas.length - 1) {
+        console.log(mapJSON);
         res.status(200).json(mapJSON);
-      });      
+      }
     });
   } catch (error) {
     boom.boomify(error);
