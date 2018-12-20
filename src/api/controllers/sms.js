@@ -3,7 +3,6 @@ import moment from 'moment';
 import Joi from 'joi';
 import PVC from '../models/pvc';
 import SMS from '../models/sms';
-import ScheduledSMS from '../models/scheduledSMS';
 
 const credentials = {
     apiKey: process.env.SMS_APIKEY,
@@ -11,23 +10,11 @@ const credentials = {
 };
 const AfricasTalking = require('africastalking')(credentials);
 
-const getScheduledSMS = async (req, res) => {
-  try {
-    const sms = await ScheduledSMS.find();
-    res.status(200).json(sms);
-  } catch (error) {
-    boom.boomify(error);
-    const err = new Error();
-    err.status = error.status || error.output.statusCode || 500;
-    err.message = error.message || 'Internal server error';
-    res.status(err.status).send(err);
-  }
-}
 
 const cancelScheduledSMS = async (req, res) => {
   const { id } = req.params;
   try {
-    const sms = await ScheduledSMS.findById(id);
+    const sms = await SMS.findById(id);
     if (!sms) {
       throw boom.notFound('No scheduled sms with such id was found');
     }
@@ -58,7 +45,7 @@ const updateScheduledSMS = async (req, res) => {
       }
       throw boom.badRequest(message);
     }
-    const sms = await ScheduledSMS.findById(id);
+    const sms = await SMS.findById(id);
     if (!sms) {
       throw boom.notFound('No scheduled sms with such id was found');
     }
@@ -79,7 +66,11 @@ const updateScheduledSMS = async (req, res) => {
 
 const getMessages = async (req, res) => {
   try {
-    const sms = await SMS.find();
+    let q = {};
+    if (req.query.is_scheduled) {
+      q['is_scheduled'] = req.query.is_scheduled;
+    }
+    const sms = await SMS.find(q);
     res.status(200).json(sms);
   } catch (error) {
     boom.boomify(error);
@@ -206,18 +197,21 @@ const sendSMS = async (req, res) => {
       throw boom.badRequest('No user found for selected query');
     }
     const phones = pvcs.map((pvc) => pvc.phone );
-
     if (value.is_scheduled) {
       if (!req.body.schedule_date) {
         throw boom.badRequest('Scheduled sms requires a date');
       }
       const date = new Date(value.schedule_date);
-      const scheduledSMS = new ScheduledSMS({
-        message,
+      const anSMS = new SMS({
+        status: 'Scheduled',
+        message: message,
+        number_of_recipient: phones.length,
+        recipients: [],
         to: phones,
-        date,
+        is_scheduled: true,
+        scheduledDate: date,
       });
-      await scheduledSMS.save();
+      await anSMS.save();
       res.status(200).json({ message: 'SMS has been scheduled.' });
     } else {
       const sms = AfricasTalking.SMS;
@@ -232,7 +226,7 @@ const sendSMS = async (req, res) => {
         status: 'Sent',
         message,
         number_of_recipient: phones.length,
-        recipients
+        recipients: recipients
       });
       await anSMS.save();
       res.status(200).json(response);
@@ -254,7 +248,7 @@ const stats = async (req, res) => {
 
     const total_sent_sms = await SMS.count();
     const total_sent_this_month = await SMS.count({ createdAt: { $gte: firstDay, $lte: lastDay }});
-    const total_scheduled_sms = await ScheduledSMS.count();
+    const total_scheduled_sms = await SMS.count({ is_scheduled: true });
     res.status(200).json({ 
       total_sent_sms,
       total_sent_this_month,
@@ -272,7 +266,6 @@ const stats = async (req, res) => {
 export default { 
   sendSMS, 
   getMessages,
-  getScheduledSMS,
   cancelScheduledSMS,
   updateScheduledSMS,
   stats,

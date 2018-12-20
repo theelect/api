@@ -24,6 +24,17 @@ const smsSchema = new Schema({
   status: {
     type: String,
   },
+  to: {
+    type: Array,
+  },
+  is_scheduled: {
+    type: Boolean,
+    default: false,
+  },
+  scheduledDate: {
+    type: Date,
+    default: null,
+  },
   message: {
    type: String,
    required: true,
@@ -36,7 +47,10 @@ const smsSchema = new Schema({
     type: Number,
     required: true
   },
-  recipients: [recipient],
+  recipients: {
+    type: [recipient],
+    default: [],
+  }
 },{
   timestamps: true
 });

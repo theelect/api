@@ -58,6 +58,7 @@ export default (app) => {
 /** *
  *  @api {get} /sms Get Sent sms
  *  @apiGroup SMS
+ *  @apiParam (Query string) {Boolean} is_scheduled optional filter by scheduled or not
  *  @apiSuccessExample {json} Success
  *
  *    HTTP/1.1 200 OK
@@ -66,6 +67,7 @@ export default (app) => {
  *       "senders_name": "Tonye Cole",
  *       "_id": "5c0e31eea49302870f26e375",
  *       "status": "Sent",
+ *       "is_scheduled": false
  *       "message": "Testing sms sending",
  *       "number_of_recipient": 1,
  *       "recipients": [
@@ -91,40 +93,6 @@ export default (app) => {
  *  }
  */
   app.get('/api/v1/sms', Auth.ensureAuthenticated, Auth.ensureCampaign, SMS.getMessages);
-
-  /** *
- *  @api {get} /sms/scheduled Get Scheduled sms
- *  @apiGroup SMS
- *  @apiParamExample {json} Input
- * {
- *	"message": "Another one updated sms sending",
- *	"schedule_date": "2018-12-18T17:05:32.000Z"
- * }
- *  @apiSuccessExample {json} Success
- *
- *    HTTP/1.1 200 OK
- * [
- *   {
- *       "to": [
- *           "+2347063226665"
- *       ],
- *       "from": "TonyeCole",
- *       "_id": "5c19200da8be1c8930a06427",
- *       "message": "Scheduling sms sending",
- *       "date": "2018-12-18T18:05:32.000Z",
- *       "createdAt": "2018-12-18T16:27:57.056Z",
- *       "updatedAt": "2018-12-18T16:27:57.056Z",
- *       "__v": 0
- *   }
- * ]
- * @apiErrorExample {json} List error
- *    HTTP/1.1 500 Bad Request
- * {
- *   "status": 500,
- *   "message": "Internal server error"
- *  }
- */
-  app.get('/api/v1/sms/scheduled', Auth.ensureAuthenticated, Auth.ensureCampaign, SMS.getScheduledSMS);
 
     /** *
  *  @api {patch} /sms/scheduled/:id Update a Scheduled sms. You can only change message or date of the scheduled sms
@@ -154,7 +122,7 @@ export default (app) => {
   app.patch('/api/v1/sms/scheduled/:id', Auth.ensureAuthenticated, Auth.ensureCampaign, SMS.updateScheduledSMS);
 
       /**
- *  @api {patch} /sms/scheduled/:id Cancel a Scheduled sms
+ *  @api {delete} /sms/scheduled/:id Cancel a Scheduled sms
  *  @apiGroup SMS
  *  @apiSuccessExample {json} Success
  *

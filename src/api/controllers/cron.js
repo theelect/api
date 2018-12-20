@@ -1,5 +1,4 @@
 import schedule from 'node-schedule';
-import ScheduledSMS from '../models/scheduledSMS';
 import SMS from '../models/sms';
 
 const credentials = {
@@ -12,12 +11,11 @@ const sms = AfricasTalking.SMS;
 
 const updateScheduledSMS = async () => {
   try {
-    const scheduledSMS = await ScheduledSMS.find({ date: { $lte: new Date() }});
+    const scheduledSMS = await SMS.find({ scheduledDate: { $lte: new Date() }, is_scheduled: true });
     if (scheduledSMS.length === 0) {
         return
     }
     scheduledSMS.forEach( async (val) => {
-        console.log('## sent scheduled sms');
       const options = {
         to: val.to,
         message: val.message,
@@ -25,14 +23,10 @@ const updateScheduledSMS = async () => {
       };
       const response = await sms.send(options);
       const recipients = response.SMSMessageData.Recipients;
-      const anSMS = new SMS({
-        status: 'Sent',
-        message: val.message,
-        number_of_recipient: val.to.length,
-        recipients
-      });
-      await anSMS.save();
-      await val.remove();
+      val.recipients = recipients;
+      val.scheduledDate = null;
+      val.is_scheduled = false;
+      await val.save();
     });
   } catch (error) {
     console.log('# Schedule Message error', error);
