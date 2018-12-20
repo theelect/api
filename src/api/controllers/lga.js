@@ -53,7 +53,6 @@ const mapData = async (req, res) => {
   try {
     // const q = { $group : {'_id': '$lga', 'lga_id': { $first: '$lga_id' }, 'count' : { $sum : 1 }} };
     const lgas = await LGA.find();
-    console.log('###', lgas);
     if (lgas.length === 0) {
       return res.status(200).json(lgas);
     }
@@ -63,7 +62,6 @@ const mapData = async (req, res) => {
       const json = [lga.map_code, count.toString()];
       mapJSON.push(json);
       if (index === lgas.length - 1) {
-        console.log(mapJSON);
         res.status(200).json(mapJSON);
       }
     });
