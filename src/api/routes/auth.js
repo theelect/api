@@ -139,7 +139,6 @@ app.delete('/api/v1/logout', Auth.ensureAuthenticated, Auth.logout);
  */
 app.post('/api/v1/request-password-reset', Auth.requestPasswordReset);
 
-
 /**
  * @api {post} /update-password Update password
  * @apiGroup Authentication
@@ -164,8 +163,29 @@ app.post('/api/v1/request-password-reset', Auth.requestPasswordReset);
  */
 app.post('/api/v1/update-password', Auth.updatePassword);
 
+/**
+ * @api {post} /change-password Update password
+ * @apiGroup Authentication
+ * @apiParam {String} old_password Current password
+ * @apiParam {String} new_password New Password
+ * @apiParamExample {json} Input
+ * {
+ *   "old_password": "adsnkmk",
+ *   "new_password": 123421
+ * }
+ * @apiSuccessExample {json} Success
+ *    HTTP/1.1 200 OK
+ *  {
+ *   "message": "Password successfully changed."
+ * }
+ * @apiErrorExample {json} List error
+ *    HTTP/1.1 400 Bad Request
+ * {
+ *   "status": 400
+ *   "message": "Reset code expired."
+ *  }
+ */
+app.post('/api/v1/change-password', Auth.ensureAuthenticated, Auth.changePassword);
+
 app.post('/api/v1/internal/admin', Auth.internalCreateAdmin);
-
-
-
 };

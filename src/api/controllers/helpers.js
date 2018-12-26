@@ -1,9 +1,102 @@
 import { Pool } from 'pg';
 import boom from 'boom';
+import phone from 'phone';
+import Joi from 'joi';
 import _ from 'lodash';
 import fetch from 'node-fetch';
 import { URLSearchParams } from 'url';
 import PVC from '../models/pvc';
+import Voter from '../models/voter';
+import LGA from '../models/lga';
+
+
+const verifyVoter = async (req, res) => {
+  try {
+    const schema = Joi.object().keys({
+      state: Joi.string().required(),
+      last_name: Joi.string().required(),
+      vin: Joi.string().required(),
+      phone_number: Joi.string().required(),
+    });
+
+    const { value, error } = Joi.validate(req.body, schema);
+    if (error && error.details) {
+      let message = 'Some required fields are missing.';
+      if (error.details[0]) {
+        message = error.details[0].message
+      }
+      throw boom.badRequest(message);
+    }
+
+    let index = states_in_nigeria.indexOf(value.state.toLowerCase()) + 1;
+    if (!index) {
+      throw boom.badRequest('Invalid state');
+    }
+    const state_id = index.toString();
+    
+    //Validate Phone number
+    const val = phone(value.phone_number, 'NG');
+    if (val.length === 0) {
+      return res.status(400).json({ 
+        "error": true,
+        "error_code": 400,
+        message: 'Invalid phone number' });
+    }
+    value.phone_number = val[0];
+
+    let { last_name, vin } = value;
+    const params = new URLSearchParams();
+    params.append('state_id', state_id);
+    params.append('last_name', last_name.toLowerCase());
+    params.append('vin', vin);
+   
+    const url = "http://voters.inecnigeria.org/Api/checkVoter";
+    const response = await fetch(url, { method: 'post',
+        body:    params,
+        headers: { 'Authorization': process.env.PVC_VERIFICATION_KEY }, });
+    const json = await response.json();
+    res.status(200).json(json);
+
+    //Save to our DB
+    let voter_info = {};
+    if (json.voterInfo) {
+      for (const key of Object.keys(json.voterInfo)) {
+        voter_info[key] = _.mapValues(json.voterInfo[key], function(s, i) {
+          if (i === 'vin') {
+            return s;
+          }
+          return _.isString(s) ? s.toLowerCase() : s;
+        });
+      }
+      const voter = new Voter({
+        first_name: voter_info.Voter.first_name,
+        last_name: voter_info.Voter.last_name,
+        other_names: voter_info.Voter.other_names,
+        vin_full: voter_info.Voter.vin,
+        gender: voter_info.Voter.gender,
+        profession: voter_info.Voter.occupation,
+        vin: value.vin,
+        state_id: value.state_id,
+        state_name: voter_info.State.name,
+        lga_name: voter_info.Pu.lga,
+        ward: voter_info.Pu.ward,
+        polling_unit: voter_info.Pu.pu,
+        phone: value.phone_number
+      });
+      voter.save();
+    }
+  } catch (error) {
+    boom.boomify(error);
+    const err = new Error();
+    err.status = error.status || error.output.statusCode || 500;
+    err.message = error.message || 'Internal server error';
+    res.status(err.status).json({ 
+      error: true,
+      error_code: err.status,
+      message: err.message });
+  }
+};
+
 // const pool = new pg.Pool();
 const cron = () => {
     const connectionString = 'postgresql://theelect:fightthegoodfight@the-elect-africa.ch1fckjskaiv.us-east-1.rds.amazonaws.com:5432/theelect'
@@ -137,6 +230,56 @@ const verifyViaApp = async (value) => {
   }
 };
 
+const updatePhoneNumbers = async () => {
+  try {
+    const pvcs = await PVC.find();
+    pvcs.forEach((pvc) => {
+      if (pvc.phone.charAt(0) !== '+') {
+        let phone = pvc.phone.substring(1);
+        phone = '+234' + phone;
+        pvc.phone = phone;
+        pvc.save();
+      }
+    })
+  } catch (error) {
+    boom.boomify(error);
+    console.log(error);
+  }
+};
+
+const updateLGA = async () => {
+  try {
+    const pvcs = await PVC.find();
+    pvcs.forEach(async(pvc) => {
+      console.log('### loop');
+      if (!pvc.lga_id) {
+        console.log('@@@ if', pvc.lga);
+        const lga = await LGA.findOne({ name: pvc.lga });
+        console.log('$$$$ if', lga);
+        if (lga) { 
+        console.log('###', lga._id);
+        pvc.lga_id = lga._id;
+        await pvc.save();
+      }
+        
+      }
+    })
+  } catch (error) {
+    boom.boomify(error);
+    console.log(error);
+  }
+};
+
+
+
+export default {
+  verifyVoter,
+  states_in_nigeria,
+  cron,
+  updatePhoneNumbers,
+  updateLGA,
+};
+
 const wards = [ 
         "choba", 
         "elelenwo", 
@@ -196,8 +339,3 @@ const states_in_nigeria = [
   "yobe",
   "zamfara"
 ];
-
-export default {
-  states_in_nigeria,
-  cron,
-};

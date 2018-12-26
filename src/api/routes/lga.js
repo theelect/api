@@ -41,4 +41,48 @@ export default (app) => {
 
 
   app.post('/api/v1/lga', LGA.create);
+
+  /**
+ * @api {get} /lga/map Get map data
+ * @apiGroup LGA
+ * @apiSuccessExample {json} Success
+ *    HTTP/1.1 200 OK
+ * [
+ *   [
+ *       "NG033015",
+ *       "98"
+ *   ],
+ *   [
+ *       "NG033016",
+ *       "7"
+ *   ],
+ *   [
+ *       "NG033008",
+ *       "10"
+ *   ],
+ *   [
+ *       "NG033022",
+ *       "3"
+ *   ],
+ *   [
+ *       "NG033002",
+ *       "5"
+ *   ],
+ *   [
+ *       "NG033005",
+ *       "1"
+ *   ],
+ *   [
+ *       "NG033004",
+ *       "1"
+ *   ]
+ * ]
+ * @apiErrorExample {json} List error
+ *    HTTP/1.1 500 Bad Request
+ * {
+ *   "status": 500,
+ *   "message": "Internal server error"
+ *  }
+ */
+  app.get('/api/v1/lga/map', LGA.mapData);
 };

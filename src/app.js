@@ -6,6 +6,7 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import Routes from './api/routes';
 import Helpers from './api/controllers/helpers';
+import Cron from './api/controllers/cron';
 
 require('dotenv').config();
 
@@ -24,8 +25,8 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 // parse requests of content-type - application/json
 app.use(bodyParser.json());
-
-app.use(cors());
+app.use(cors({ origin: '*' }));
+// app.use(cors());
 
 app.use(express.static("src/public"));
 
@@ -59,8 +60,10 @@ app.get('/', (req, res) => {
 	res.json({ message: 'Welcome to Elect application.' });
 });
 
-Routes(app);
 
-// Helpers.cron();
+Routes(app);
+Cron.scheduleJobs();
+
+// Helpers.updateLGA();
 
 export default app;

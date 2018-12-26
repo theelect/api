@@ -11,6 +11,9 @@ const lgaSchema = new Schema({
    type: String,
    required: true,
   },
+  map_code: {
+    type: String,
+  },
   wards: {
     type: [String],
     default: [],
