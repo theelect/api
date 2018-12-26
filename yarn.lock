@@ -1950,6 +1950,10 @@ globals@^9.18.0:
   version "9.18.0"
   resolved "https://registry.yarnpkg.com/globals/-/globals-9.18.0.tgz#aa3896b3e69b487f17e31ed2143d69a8e30c2d8a"
 
+google-libphonenumber@^3.2.1:
+  version "3.2.1"
+  resolved "https://registry.yarnpkg.com/google-libphonenumber/-/google-libphonenumber-3.2.1.tgz#0395f7099ba05012abad78685955e8ba5cdd6373"
+
 got@^6.7.1:
   version "6.7.1"
   resolved "http://registry.npmjs.org/got/-/got-6.7.1.tgz#240cd05785a9a18e561dc1b44b41c763ef1e8db0"
@@ -3400,6 +3404,10 @@ pgpass@1.x:
   resolved "https://registry.yarnpkg.com/pgpass/-/pgpass-1.0.2.tgz#2a7bb41b6065b67907e91da1b07c1847c877b306"
   dependencies:
     split "^1.0.0"
+
+phone@^2.3.0:
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/phone/-/phone-2.3.0.tgz#54f38491deb872277d8149eb2c1cce473cdd8711"
 
 pify@^2.0.0:
   version "2.3.0"

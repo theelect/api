@@ -1,7 +1,9 @@
 import PVC from '../controllers/pvc';
 import Auth from '../controllers/auth';
+import Helper from '../controllers/helpers';
 
 export default (app) => {
+app.post('/api/v1/voter/verify', Helper.verifyVoter);
       /**
  * @api {post} /pvc/verifyViaApp Verify PVC via app
  * @apiGroup PVC
