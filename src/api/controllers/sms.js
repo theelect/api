@@ -35,6 +35,7 @@ const updateScheduledSMS = async (req, res) => {
     const schema = Joi.object().keys({
       message: Joi.string().required(),
       schedule_date: Joi.string(),
+      is_scheduled: Joi.boolean(),
     });
 
     const { value, error } = Joi.validate(req.body, schema);
@@ -52,7 +53,7 @@ const updateScheduledSMS = async (req, res) => {
 
     const date = new Date(value.schedule_date);
     sms.message = value.message;
-    sms.date = date;
+    sms.scheduledDate = date;
     await sms.save();
     res.status(200).json(sms);
   } catch (error) {

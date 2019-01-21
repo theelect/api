@@ -50,8 +50,7 @@ const pvcSchema = new Schema({
   },
   phone: {
     type: String,
-    unique: true,
-    required: true,
+    default: '',
   },
   gender: {
     type: String,
@@ -70,6 +69,10 @@ const pvcSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'User',
     default: null
+  },
+  data_from: {
+    type: String,
+    default: null,
   },
   polling_unit: {
     type: String,
